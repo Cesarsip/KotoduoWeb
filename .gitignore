@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Credenciales de semilla: NUNCA viajan con el código (Informe 3, §8.2)
+api/credenciales_semilla.txt
+
+# Bases de datos y documentos generados (se reconstruyen con datos/ejecutar_datos.py)
+datos/kotoduo.db
+
+# Llaves de acceso SSH (jamás en el repositorio)
+*.pem
+*.key
+
+# Sistema
+.DS_Store
+Thumbs.db
