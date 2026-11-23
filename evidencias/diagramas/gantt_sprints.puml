@@ -1,0 +1,15 @@
+@startgantt
+title Cronograma ES2 - Sprints (20-10-2026 a 27-11-2026)
+[Requisitos y backlog (S0)] lasts 5 days
+[Arquitectura y datos] lasts 5 days
+[API y seguridad] lasts 7 days
+[Prototipo UX] lasts 7 days
+[Pruebas] lasts 5 days
+[Informe y disertación] lasts 5 days
+[Requisitos y backlog (S0)] -> [Arquitectura y datos]
+[Arquitectura y datos] -> [API y seguridad]
+[Arquitectura y datos] -> [Prototipo UX]
+[API y seguridad] -> [Pruebas]
+[Prototipo UX] -> [Pruebas]
+[Pruebas] -> [Informe y disertación]
+@endgantt

@@ -1,0 +1,40 @@
+@startuml casos_uso
+title Casos de uso — actores y funciones
+left to right direction
+actor "Operario" as Op
+actor "Encargado" as Enc
+actor "Vendedor" as Ven
+actor "Administrador" as Adm
+actor "Sistema" as Sys
+
+rectangle "Kotoduo Producción" {
+  usecase "Iniciar sesión" as UC1
+  usecase "Ver mis tareas asignadas" as UC2
+  usecase "Registrar avance de etapa" as UC3
+  usecase "Crear trabajo" as UC4
+  usecase "Aprobar diseño" as UC5
+  usecase "Consultar tablero" as UC6
+  usecase "Consultar estado de pedido" as UC7
+  usecase "Ver alertas de insumos" as UC8
+  usecase "Gestionar usuarios" as UC9
+  usecase "Ver bitácora" as UC10
+  usecase "Calcular stock y generar alertas" as UC11
+}
+Op --> UC1
+Op --> UC2
+Op --> UC3
+Enc --> UC1
+Enc --> UC4
+Enc --> UC5
+Enc --> UC6
+Enc --> UC8
+Ven --> UC1
+Ven --> UC7
+Ven --> UC8
+Adm --> UC1
+Adm --> UC9
+Adm --> UC10
+Sys --> UC11
+UC11 ..> UC8 : <<include>>
+UC3 ..> UC2 : <<extend>>
+@enduml

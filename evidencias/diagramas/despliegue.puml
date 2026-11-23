@@ -1,0 +1,23 @@
+@startuml despliegue
+title Diagrama de despliegue
+node "Navegador del usuario\n(móvil / desktop)" as N {
+  artifact "PWA (React)" as PWA
+}
+node "Servidor de aplicaciones" as S {
+  artifact "Nginx" as NG
+  artifact "API FastAPI\n(Python + Uvicorn)" as API
+}
+node "Servidor de datos" as D {
+  database "PostgreSQL\n(estructurada)" as PG
+  database "MongoDB\n(no estructurada)" as MG
+}
+N --> NG : HTTPS
+NG --> API : reverse proxy
+API --> PG : SQL parametrizado
+API --> MG : documentos JSON
+note right of API
+  Docker Compose orquesta
+  los contenedores (API, DB)
+  y las migraciones (Alembic)
+end note
+@enduml

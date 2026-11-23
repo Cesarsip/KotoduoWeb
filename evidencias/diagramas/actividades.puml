@@ -1,0 +1,27 @@
+@startuml actividades
+title Actividades — proceso productivo Kotoduo
+start
+:Encargado registra trabajo
+(ficha única con medidas y compromiso);
+:Etapa 1: Diseño y aprobación
+(operario diseña, encargado aprueba);
+if (¿Diseño aprobado?) then (sí)
+  :Etapa 2: Material
+  (verificar stock de insumos);
+  if (¿Stock suficiente?) then (sí)
+    :Etapa 3: Producción
+    (confección, bordado, serigrafía);
+    :Etapa 4: Despacho
+    (preparar y entregar);
+    :Trabajo terminado;
+  else (no)
+    :Detener trabajo
+    + alerta de insumo a bajo umbral;
+    :Encargado gestiona reposición;
+  endif
+else (no)
+  :Devolver a diseño
+  + nueva variante;
+endif
+stop
+@enduml

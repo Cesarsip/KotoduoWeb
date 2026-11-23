@@ -1,0 +1,29 @@
+@startuml mapa_navegacion
+title Mapa de navegación del prototipo
+skinparam componentStyle rectangle
+package "Acceso" {
+  [Pantalla de inicio de sesión] as Login
+}
+package "Rol Operario" {
+  [Mis tareas] as Tareas
+  [Detalle de etapa] as Detalle
+}
+package "Rol Encargado" {
+  [Tablero de producción] as Tablero
+  [Nuevo trabajo] as Nuevo
+}
+package "Rol Vendedor" {
+  [Consulta de pedido] as Pedido
+}
+package "Rol Administrador" {
+  [Usuarios] as Usuarios
+  [Bitácora] as Bitacora
+}
+Login --> Tareas : operario
+Login --> Tablero : encargado
+Login --> Pedido : vendedor
+Login --> Usuarios : administrador
+Tareas --> Detalle : tocar tarjeta
+Tablero --> Nuevo : botón "Nuevo trabajo"
+Usuarios --> Bitacora : clic en usuario
+@enduml

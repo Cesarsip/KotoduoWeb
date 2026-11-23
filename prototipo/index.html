@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0F172A">
+<meta name="description" content="Kotoduo Producción - control de trabajos, etapas, diseños e insumos del taller.">
+<title>Kotoduo Producción</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232563EB'/><text x='16' y='23' font-size='20' font-family='sans-serif' font-weight='700' fill='white' text-anchor='middle'>K</text></svg>">
+</head>
+<body>
+
+<header class="topbar">
+  <span class="logo"><span class="marca" aria-hidden="true">K</span>Kotoduo <small>Producción</small></span>
+  <span id="sesion" class="sesion"></span>
+</header>
+
+<main id="app">
+
+  <!-- ============================================================ Login -->
+  <section id="p-login" class="pantalla activa">
+    <div class="login">
+      <div class="login-marca">
+        <span class="marca grande" aria-hidden="true">K</span>
+        <h1>Kotoduo <span>Producción</span></h1>
+        <p class="login-bajada">El taller en una sola pantalla: trabajos, etapas, diseños y alertas de insumos, sin planillas paralelas.</p>
+        <ul class="login-puntos">
+          <li>Cuatro perfiles con permisos distintos</li>
+          <li>Sin montos ni datos de contacto</li>
+          <li>Cada acción queda en la bitácora</li>
+        </ul>
+      </div>
+
+      <div class="login-form">
+        <h2>Iniciar sesión</h2>
+        <p class="sub">Cuentas individuales; cada perfil ve solo lo suyo.</p>
+        <form id="f-login">
+          <label class="campo">Usuario
+            <input id="i-usuario" value="msanchez" autocomplete="username" spellcheck="false">
+          </label>
+          <label class="campo">Contraseña
+            <input id="i-clave" type="password" value="Koto.Op.2026!" autocomplete="current-password">
+          </label>
+          <button class="btn ancho" type="submit">Entrar</button>
+        </form>
+        <p class="demo">Prototipo: elige un perfil de prueba
+          <button class="link" data-user="msanchez|Koto.Op.2026!">Operario</button> ·
+          <button class="link" data-user="bjaque|Koto.Enca.2026">Encargado</button> ·
+          <button class="link" data-user="jrojas|Koto.Vend.2026">Vendedor</button> ·
+          <button class="link" data-user="aeo|Koto.Admin.2026">Administrador</button>
+        </p>
+        <p class="nota error" id="login-error" hidden></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ Operario -->
+  <section id="p-operario" class="pantalla">
+    <div class="cabecera">
+      <div>
+        <h1>Mis tareas de hoy</h1>
+        <p class="sub">Toca la etapa para ver medidas y materiales (tres toques).</p>
+      </div>
+      <span class="avatar" id="op-avatar" aria-hidden="true">OP</span>
+    </div>
+
+    <div class="carga" id="op-carga" hidden><span class="spinner" aria-label="Cargando"></span></div>
+    <div class="grilla-1" id="op-lista"></div>
+  </section>
+
+  <!-- ============================================================ Encargado -->
+  <section id="p-encargado" class="pantalla">
+    <div class="cabecera">
+      <div>
+        <h1>Tablero de producción</h1>
+        <p class="sub">Estado en común del taller, sin depender de la memoria de una persona.</p>
+      </div>
+      <button class="btn" id="btn-nuevo" type="button">Nuevo trabajo</button>
+    </div>
+
+    <div class="kpis" id="kpis"></div>
+
+    <div class="segmentos" role="tablist" aria-label="Vistas del encargado">
+      <button class="segmento activo" role="tab" aria-selected="true" data-seg="seg-tablero">Tablero</button>
+      <button class="segmento" role="tab" aria-selected="false" data-seg="seg-disenos">Diseños <span class="punto" id="dis-punto" hidden></span></button>
+      <button class="segmento" role="tab" aria-selected="false" data-seg="seg-alertas">Alertas <span class="punto" id="alert-punto" hidden></span></button>
+    </div>
+
+    <!-- Tablero -->
+    <div class="segmento-panel activo" id="seg-tablero" role="tabpanel">
+      <div class="carga" id="tab-carga" hidden><span class="spinner" aria-label="Cargando"></span></div>
+      <div class="tablero" id="tablero"></div>
+    </div>
+
+    <!-- Aprobación de diseños (HU-06) -->
+    <div class="segmento-panel" id="seg-disenos" role="tabpanel" hidden>
+      <div class="barra-herramientas">
+        <label class="campo inline">Trabajo
+          <select id="dis-trabajo"></select>
+        </label>
+        <button class="btn secundario" id="dis-nueva" type="button">Subir versión</button>
+      </div>
+      <form class="form-grid" id="f-diseno" hidden>
+        <label class="campo">Archivo <input id="d-archivo" placeholder="diseños/KTO-2026-017/v2_letrero.svg" required></label>
+        <label class="campo">Formato
+          <select id="d-formato"><option>svg</option><option>png</option><option>pdf</option><option>jpg</option></select>
+        </label>
+        <label class="campo">Paleta <input id="d-paleta" placeholder="azul marino, blanco"></label>
+        <label class="campo">Variante <input id="d-variante" placeholder="frontal 28x18 cm"></label>
+        <label class="campo completo">Observaciones <input id="d-obs" placeholder="Cliente pidió bajar el ribete 2 mm"></label>
+        <div class="acciones">
+          <button class="btn" type="submit">Guardar versión</button>
+          <button class="btn fantasma" type="button" id="dis-cancelar">Cancelar</button>
+        </div>
+      </form>
+      <div class="carga" id="dis-carga" hidden><span class="spinner" aria-label="Cargando"></span></div>
+      <div class="grilla-1" id="dis-lista"></div>
+    </div>
+
+    <!-- Alertas de insumos (HU-04) -->
+    <div class="segmento-panel" id="seg-alertas" role="tabpanel" hidden>
+      <div class="grilla-1" id="alertas"></div>
+    </div>
+  </section>
+
+  <!-- ============================================================ Nuevo trabajo -->
+  <section id="p-nuevo" class="pantalla">
+    <div class="cabecera">
+      <div>
+        <h1>Nuevo trabajo</h1>
+        <p class="sub">Ficha única: lo que hoy está en Excel, carpetas y chats.</p>
+      </div>
+    </div>
+
+    <form id="f-trabajo" class="form-grid tarjeta">
+      <label class="campo">Código <input id="t-codigo" pattern="KTO-2026-[0-9]{3}" placeholder="KTO-2026-017" required></label>
+      <label class="campo">Tipo
+        <select id="t-tipo">
+          <option value="uniforme">Uniforme</option>
+          <option value="letrero">Letrero</option>
+          <option value="bordado_libre">Bordado libre</option>
+        </select>
+      </label>
+      <label class="campo">Cliente (sin contactos) <input id="t-cliente" placeholder="Escuela Gabriela Mistral" required></label>
+      <label class="campo">Referencia de pedido <input id="t-pedido" placeholder="PED-INT-80" maxlength="30"></label>
+      <label class="campo">Unidades <input id="t-unidades" type="number" value="25" min="1" max="5000"></label>
+      <label class="campo">Fecha compromiso <input id="t-fecha" type="date"></label>
+      <label class="campo completo">Medidas <input id="t-medidas" placeholder="Pecho 26 cm, manga 16 cm" required></label>
+      <p class="nota completo">El sistema no almacena montos ni precios: esa información queda en la administración de la empresa.</p>
+      <div class="acciones completo">
+        <button class="btn" type="submit">Guardar y enviar a diseño</button>
+        <button class="btn fantasma" type="button" id="t-cancelar">Volver al tablero</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ============================================================ Vendedor (HU-08) -->
+  <section id="p-vendedor" class="pantalla">
+    <div class="cabecera">
+      <div>
+        <h1>Estado de un pedido</h1>
+        <p class="sub">Responde al cliente sin interrumpir a producción.</p>
+      </div>
+      <span class="avatar" id="ven-avatar" aria-hidden="true">VE</span>
+    </div>
+
+    <form id="f-buscar" class="buscador">
+      <input id="b-codigo" placeholder="KTO-2026-015" pattern="KTO-2026-[0-9]{3}" spellcheck="false" aria-label="Código del pedido">
+      <button class="btn" type="submit">Buscar</button>
+    </form>
+
+    <div class="carga" id="ven-carga" hidden><span class="spinner" aria-label="Cargando"></span></div>
+    <div class="grilla-1" id="resultado"></div>
+  </section>
+
+  <!-- ============================================================ Administrador -->
+  <section id="p-admin" class="pantalla">
+    <div class="cabecera">
+      <div>
+        <h1>Usuarios y bitácora</h1>
+        <p class="sub">Altas, bajas y quién hizo qué, con fecha y hora.</p>
+      </div>
+      <button class="btn secundario" id="adm-nuevo" type="button">Nuevo usuario</button>
+    </div>
+
+    <form id="f-usuario" class="form-grid tarjeta" hidden>
+      <label class="campo">Usuario <input id="u-usuario" placeholder="lgomez" pattern="[a-z0-9._-]{3,20}" required></label>
+      <label class="campo">Nombre <input id="u-nombre" placeholder="Lucía Gómez" required></label>
+      <label class="campo">Contraseña <input id="u-clave" type="password" minlength="8" placeholder="mínimo 8 caracteres" required></label>
+      <label class="campo">Rol
+        <select id="u-rol">
+          <option value="operario">Operario</option>
+          <option value="encargado">Encargado</option>
+          <option value="vendedor">Vendedor</option>
+          <option value="administrador">Administrador</option>
+        </select>
+      </label>
+      <div class="acciones completo">
+        <button class="btn" type="submit">Crear usuario</button>
+        <button class="btn fantasma" type="button" id="u-cancelar">Cancelar</button>
+      </div>
+    </form>
+
+    <div class="tabla-envoltura tarjeta">
+      <table>
+        <caption>Usuarios del sistema</caption>
+        <thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Estado</th><th class="der">Acciones</th></tr></thead>
+        <tbody id="tabla-usuarios"></tbody>
+      </table>
+    </div>
+
+    <h2 class="seccion">Bitácora reciente</h2>
+    <p class="sub">Registro inmutable: no se edita ni se borra.</p>
+    <div class="tabla-envoltura tarjeta">
+      <table>
+        <caption>Últimos 20 movimientos</caption>
+        <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Entidad</th><th>Detalle</th></tr></thead>
+        <tbody id="tabla-bitacora"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<nav class="bottomnav" id="nav" hidden>
+  <button data-pantalla="p-operario" data-rol="operario" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <span>Tareas</span>
+  </button>
+  <button data-pantalla="p-encargado" data-rol="encargado administrador" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+    <span>Tablero</span>
+  </button>
+  <button data-pantalla="p-vendedor" data-rol="vendedor" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
+    <span>Pedidos</span>
+  </button>
+  <button data-pantalla="p-admin" data-rol="administrador" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span>Admin</span>
+  </button>
+  <button id="btn-salir" class="salir" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+    <span>Salir</span>
+  </button>
+</nav>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>

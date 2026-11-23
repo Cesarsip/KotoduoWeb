@@ -1,0 +1,26 @@
+Ejecución: 22-11-2026 22:36
+SQLite 3.49.1
+
+===== DDL (esquema): kotoduo_schema.sql =====
+OK - ejecutado sin errores
+
+===== Datos de ejemplo: kotoduo_datos.sql =====
+OK - ejecutado sin errores
+
+Tablas creadas: alertas_insumo, aprobaciones_diseno, bitacora, etapas_definicion, etapas_trabajo, insumos, movimientos_insumo, sqlite_sequence, trabajos, usuarios
+
+alertas_insumo: 7 columnas, 1 FK
+aprobaciones_diseno: 7 columnas, 2 FK
+bitacora: 8 columnas, 1 FK
+etapas_definicion: 5 columnas
+etapas_trabajo: 8 columnas, 3 FK
+insumos: 5 columnas
+movimientos_insumo: 7 columnas, 3 FK
+sqlite_sequence: 2 columnas
+trabajos: 11 columnas, 1 FK
+usuarios: 7 columnas
+Indices: 10
+
+===== Prueba de integridad referencial =====
+FK inválida rechazada -> FOREIGN KEY constraint failed
+CHECK unidades > 0 rechazado -> CHECK constraint failed: unidades > 0

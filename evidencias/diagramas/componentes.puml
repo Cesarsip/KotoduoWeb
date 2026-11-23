@@ -1,0 +1,21 @@
+@startuml componentes
+title Diagrama de componentes — arquitectura Kotoduo
+package "Presentación" {
+  [PWA React + Vite] as PWA
+}
+package "Aplicación" {
+  [API FastAPI (Python)] as API
+  [Auth / RBAC] as Auth
+}
+package "Datos" {
+  [PostgreSQL / SQLite] as SQL
+  [MongoDB / TinyDB] as NoSQL
+  [Bitácora auditoría] as Bit
+}
+PWA --> API : HTTPS / JSON
+API --> Auth : validar sesión
+Auth --> SQL : verificar usuario
+API --> SQL : CRUD relacional
+API --> NoSQL : documentos de diseño
+API --> Bit : registrar acciones
+@enduml

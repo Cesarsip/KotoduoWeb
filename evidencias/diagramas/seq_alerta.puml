@@ -1,0 +1,22 @@
+@startuml seq_alerta
+title Secuencia — Consulta móvil y alerta de insumos (encargado/vendedor)
+skinparam sequenceMessageAlign center
+actor "Vendedor" as V
+participant "PWA Móvil" as P
+participant "API FastAPI" as API
+database "SQLite" as DB
+
+V -> P: Abrir "Pedidos" y buscar KTO-2026-015
+P -> API: GET /trabajos/siguiente\n(Authorization: Bearer <token>)
+API -> API: Verificar token y rol
+API -> DB: SELECT trabajos + etapas_trabajo
+DB --> API: estado actual, etapa, fecha
+API --> P: JSON {codigo, etapa, fecha}
+P --> V: "En producción · etapa Material"
+
+note over API, DB
+  Si stock < umbral → alerta_insumo
+  Se notifica a encargado y vendedor
+  (mismo patrón que /insumos/alertas)
+end note
+@enduml

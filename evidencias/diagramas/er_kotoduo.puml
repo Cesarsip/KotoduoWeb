@@ -1,0 +1,89 @@
+@startuml er_kotoduo
+title Entidad-Relación — base de datos Kotoduo
+skinparam linetype ortho
+entity "usuarios" as U {
+  * id : int <<PK>>
+  --
+  * usuario : varchar <<UQ>>
+  * password_hash : varchar
+  * rol : varchar
+  * activo : boolean
+}
+entity "etapas_definicion" as ED {
+  * id : int <<PK>>
+  --
+  * nombre : varchar
+  * area : varchar
+  * orden : int
+}
+entity "trabajos" as T {
+  * id : int <<PK>>
+  --
+  * codigo : varchar <<UQ>>
+  * tipo_trabajo : varchar
+  cliente_etiqueta : varchar
+  pedido_ref : varchar
+  * unidades : int
+  * medidas : text
+  fecha_compromiso : date
+  estado_general : varchar
+}
+entity "etapas_trabajo" as ET {
+  * id : int <<PK>>
+  --
+  * trabajo_id : int <<FK>>
+  * etapa_def_id : int <<FK>>
+  responsable_id : int <<FK>>
+  * estado : varchar
+  fecha_cierre : datetime
+}
+entity "insumos" as I {
+  * id : int <<PK>>
+  --
+  * nombre : varchar
+  * stock_actual : decimal
+  * umbral_minimo : decimal
+  unidad : varchar
+}
+entity "movimientos_insumo" as MI {
+  * id : int <<PK>>
+  --
+  * insumo_id : int <<FK>>
+  * tipo : varchar
+  * cantidad : decimal
+  fecha : datetime
+}
+entity "alertas_insumo" as AI {
+  * id : int <<PK>>
+  --
+  insumo_id : int <<FK>
+  trabajo_id : int <<FK>
+  fecha : datetime
+  estado : varchar
+}
+entity "aprobaciones_diseno" as AD {
+  * id : int <<PK>>
+  --
+  * trabajo_id : int <<FK>>
+  * variante : int
+  resultado : varchar
+  fecha : datetime
+}
+entity "bitacora" as B {
+  * id : int <<PK>>
+  --
+  * usuario_id : int <<FK>>
+  accion : varchar
+  entidad : varchar
+  entidad_id : int
+  fecha : datetime
+}
+U ||--o{ ET : "responsable"
+U ||--o{ B : "registra"
+T ||--o{ ET : "tiene"
+ED ||--o{ ET : "define"
+T ||--o{ AD : "incluye"
+T ||--o{ AI : "origina"
+I ||--o{ MI : "movimientos"
+I ||--o{ AI : "genera"
+@enduml

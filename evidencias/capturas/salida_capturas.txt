@@ -1,0 +1,10 @@
+﻿capturado cap01_login -> http://127.0.0.1:8000/
+capturado cap02_operario_tareas -> http://127.0.0.1:8000/
+capturado cap03_operario_toast_avance -> http://127.0.0.1:8000/
+capturado cap04_encargado_tablero -> http://127.0.0.1:8000/
+capturado cap05_encargado_nuevo_trabajo -> http://127.0.0.1:8000/
+capturado cap06_vendedor_estado_pedido -> http://127.0.0.1:8000/
+capturado cap07_admin_usuarios_bitacora -> http://127.0.0.1:8000/
+capturado cap08_movil_operario -> http://127.0.0.1:8000/
+capturado cap09_movil_tablero -> http://127.0.0.1:8000/
+OK: 9 capturas

@@ -1,0 +1,42 @@
+Ejecución de consultas: 22-11-2026 22:36
+
+===== CQ-01: siguiente actividad abierta de cada trabajo en producción =====
+codigo | siguiente_etapa | area | responsable
+KTO-2026-014 | Confección | confección | Mariana Soto
+KTO-2026-014 | Bordado | bordado | NULL
+KTO-2026-014 | Terminaciones | terminaciones | NULL
+KTO-2026-015 | Material | corte | Mariana Soto
+KTO-2026-015 | Grabado | impresion | NULL
+KTO-2026-015 | Instalacion | instalacion | NULL
+(6 filas)
+
+===== CQ-02: tablero general (HU-05 / RF-08) =====
+estado_general | trabajos
+detenido | 1
+en_producción | 2
+(2 filas)
+
+===== CQ-03: insumos bajo el umbral minimo (RF-06) =====
+nombre | stock_actual | umbral_minimo
+Tinta sublimación negra | 0.8 | 2.0
+(1 filas)
+
+===== CQ-04: trabajos cuya aprobación de diseño quedo rechazada y su version vigente (RF-07) =====
+codigo | version | estado | comentarios
+KTO-2026-014 | 1 | aprobado | Aprobado por el colegio; ajustar color de ribete.
+KTO-2026-015 | 1 | rechazado | Letra muy fina para la distancia de lectura.
+KTO-2026-015 | 2 | aprobado | Version con letra bold; conforme.
+KTO-2026-016 | 1 | pendiente | NULL
+(4 filas)
+
+===== CQ-05: bitacora de una entidad concreta (RF-11) =====
+fecha | nombre | accion | entidad | valor_anterior | valor_posterior
+2026-11-23 01:36:07 | Benjamin Jaque | crear | trabajos | NULL | KTO-2026-014
+(1 filas)
+
+===== CQ-06: consumo de insumos por trabajo (trazabilidad producción -> insumos) =====
+codigo | nombre | consumido
+KTO-2026-014 | Polos blancos M | 40.0
+KTO-2026-015 | Tinta sublimación negra | 0.6
+(2 filas)
+

@@ -1,0 +1,96 @@
+@startuml clases_kotoduo
+title Diagrama de clases — dominio Kotoduo
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+class Usuario {
+  id : int
+  usuario : str
+  password_hash : str
+  rol : Rol
+  activo : bool
+}
+enum Rol {
+  OPERARIO
+  ENCARGADO
+  VENDEDOR
+  ADMINISTRADOR
+}
+class Trabajo {
+  id : int
+  codigo : str
+  tipo_trabajo : TipoTrabajo
+  cliente_etiqueta : str
+  pedido_ref : str
+  unidades : int
+  medidas : str
+  fecha_compromiso : date
+  estado_general : Estado
+}
+enum TipoTrabajo {
+  UNIFORME
+  LETRERO
+  BORDADO_LIBRE
+}
+enum Estado {
+  EN_PRODUCCION
+  ATRASADO
+  DETENIDO
+  TERMINADO
+}
+class EtapaDefinicion {
+  id : int
+  nombre : str
+  area : str
+  orden : int
+}
+class EtapaTrabajo {
+  id : int
+  estado : str
+  responsable : Usuario
+  fecha_cierre : datetime
+}
+class Insumo {
+  id : int
+  nombre : str
+  stock_actual : decimal
+  umbral_minimo : decimal
+  unidad : str
+}
+class MovimientoInsumo {
+  id : int
+  tipo : str
+  cantidad : decimal
+  fecha : datetime
+}
+class AlertaInsumo {
+  id : int
+  fecha : datetime
+  estado : str
+}
+class AprobacionDiseno {
+  id : int
+  variante : int
+  resultado : str
+  fecha : datetime
+}
+class Bitacora {
+  id : int
+  usuario : Usuario
+  accion : str
+  entidad : str
+  fecha : datetime
+}
+
+Usuario "1" -- "*" EtapaTrabajo : responsable >
+EtapaDefinicion "1" -- "*" EtapaTrabajo
+Trabajo "1" -- "*" EtapaTrabajo
+Trabajo "1" -- "*" AprobacionDiseno
+Trabajo "*" -- "0..1" AlertaInsumo : alerta de retraso >
+Insumo "1" -- "*" MovimientoInsumo
+Insumo "1" -- "*" AlertaInsumo
+Usuario "1" -- "*" Bitacora
+Usuario .. Rol
+Trabajo .. TipoTrabajo
+Trabajo .. Estado
+@enduml

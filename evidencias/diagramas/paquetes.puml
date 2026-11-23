@@ -1,0 +1,28 @@
+@startuml paquetes
+title Diagrama de paquetes
+package "kotoduo.frontend" {
+  [Login] as L
+  [Operario] as O
+  [Encargado] as E
+  [Vendedor] as V
+  [Administrador] as A
+}
+package "kotoduo.backend" {
+  [API REST] as API
+  [Seguridad] as S
+  [Servicios] as SV
+}
+package "kotoduo.datos" {
+  [Repositorios] as R
+  [Migraciones] as M
+}
+[L] --> API
+[O] --> API
+[E] --> API
+[V] --> API
+[A] --> API
+API --> S
+API --> SV
+SV --> R
+R --> M
+@enduml

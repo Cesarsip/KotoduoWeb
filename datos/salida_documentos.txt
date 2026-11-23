@@ -1,0 +1,16 @@
+Base documental TinyDB: C:\Users\cesar\Downloads\KotoduoWeb\datos\documentos.json
+Documentos almacenados: 3
+
+===== BQ-01: diseño aprobado de un trabajo (consulta por ruta) =====
+KTO-2026-015 v2: diseños/KTO-2026-015/v2_letrero.pdf (1 variante(s))
+
+===== BQ-02: variantes con medidas exactas "15x15 cm" (búsqueda en subdocumentos) =====
+KTO-2026-016: escudo 15x15 cm
+
+===== BQ-03: proyección ligera (códigos, versión y aprobación) =====
+KTO-2026-014 v1 aprobado=True
+KTO-2026-015 v2 aprobado=True
+KTO-2026-016 v1 aprobado=False
+
+===== BQ-04: actualización de un campo (operación de modificación) =====
+KTO-2026-016: aprobado=True por jrojas

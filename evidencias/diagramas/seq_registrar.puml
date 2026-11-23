@@ -1,0 +1,19 @@
+@startuml seq_registrar
+title Secuencia — Registrar trabajo (encargado)
+skinparam sequenceMessageAlign center
+actor "Encargado" as E
+participant "UI Formulario" as UI
+participant "API FastAPI" as API
+database "SQLite" as DB
+database "TinyDB\n(diseños)" as Doc
+
+E -> UI: Llenar ficha (código, tipo,\ncliente, unidades, medidas)
+UI -> API: POST /trabajos\n{codigo, tipo, cliente, unidades, ...}
+API -> API: Validar Pydantic\n(código, HTML, unidades > 0)
+API -> DB: INSERT INTO trabajos
+API -> DB: INSERT INTO etapas_trabajo\n(cada etapa del tipo, estado pendiente)
+API -> DB: INSERT INTO bitacora (accion='crear')
+DB --> API: OK
+API --> UI: 201 Created {id, codigo}
+UI --> E: Confirmación: "Trabajo creado"
+@enduml

@@ -10,6 +10,10 @@ api/credenciales_semilla.txt
 
 # Bases de datos y documentos generados (se reconstruyen con datos/ejecutar_datos.py)
 datos/kotoduo.db
+datos/documentos.json
+
+# Generador de diagramas (22 MB; se descarga con `java -jar plantuml.jar`)
+plantuml.jar
 
 # Llaves de acceso SSH (jamás en el repositorio)
 *.pem
