@@ -27,12 +27,23 @@ from argon2.exceptions import VerifyMismatchError
 from tinydb import TinyDB, Query
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE, '..', 'datos', 'kotoduo.db')
-DOC_PATH = os.path.join(BASE, '..', 'datos', 'documentos.json')
+# Las rutas pueden sustituirse por variable de entorno. En el servidor esto
+# permite correr las pruebas contra una copia (KOTODUO_DB) sin tocar la base
+# real de producción; en desarrollo se usan las rutas por defecto.
+DB_PATH = os.environ.get('KOTODUO_DB') or os.path.join(BASE, '..', 'datos', 'kotoduo.db')
+DOC_PATH = os.environ.get('KOTODUO_DOC_DB') or os.path.join(BASE, '..', 'datos', 'documentos.json')
 PROTOTIPO = os.path.join(BASE, '..', 'prototipo')
 
 ph = PasswordHasher()
-app = FastAPI(title='Kotoduo API')
+
+# La documentación interactiva queda activa en desarrollo y se apaga en el
+# servidor (KOTODUO_DOCS=0 en el servicio systemd): exponer Swagger en
+# producción amplía la superficie de ataque sin beneficio operativo.
+DOCS_ACTIVOS = os.environ.get('KOTODUO_DOCS', '1') != '0'
+app = FastAPI(title='Kotoduo API',
+              docs_url='/docs' if DOCS_ACTIVOS else None,
+              redoc_url='/redoc' if DOCS_ACTIVOS else None,
+              openapi_url='/openapi.json' if DOCS_ACTIVOS else None)
 bearer = HTTPBearer()
 
 # Sesiones en memoria: decisión de i +1 trabajador registrada en el informe.
@@ -583,6 +594,15 @@ def modificar_usuario(usuario_id: int, body: UsuarioPatch, db=Depends(get_db),
     actualizado = db.execute('SELECT id, usuario, nombre, rol, activo FROM usuarios '
                              'WHERE id=?', (usuario_id,)).fetchone()
     return dict(actualizado)
+
+
+# ------------------------------------------------------------------ operación
+@app.get('/health')
+def health(db=Depends(get_db)):
+    """Sonda de estado para Nginx y el monitoreo: comprueba que la base
+    responde y no expone ningún dato."""
+    db.execute('SELECT 1').fetchone()
+    return {'estado': 'ok'}
 
 
 # ------------------------------------------------------------------ interfaz web (§8.2)

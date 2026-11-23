@@ -7,8 +7,12 @@ DATOS = os.path.join(BASE, '..', 'datos')
 
 
 def pytest_sessionstart(session):
-    subprocess.run([sys.executable, os.path.join(DATOS, 'ejecutar_datos.py')],
-                   check=True, capture_output=True)
+    # Reconstruye ambas bases. Si KOTODUO_DB / KOTODUO_DOC_DB apuntan a una
+    # copia (como en el servidor), solo se reconstruye la copia: la base de
+    # producción no se toca.
+    for script in ('ejecutar_datos.py', 'crear_documentos.py'):
+        subprocess.run([sys.executable, os.path.join(DATOS, script)],
+                       check=True, capture_output=True)
     rend = os.path.join(BASE, 'salida_rendimiento.txt')
     if os.path.exists(rend):
         os.remove(rend)

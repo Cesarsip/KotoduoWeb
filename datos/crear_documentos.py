@@ -11,7 +11,8 @@ from tinydb import TinyDB, Query
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 BASE = os.path.dirname(os.path.abspath(__file__))
-DBPATH = os.path.join(BASE, 'documentos.json')
+# KOTODUO_DOC_DB permite apuntar a otra ficha documental (copia de prueba).
+DBPATH = os.environ.get('KOTODUO_DOC_DB') or os.path.join(BASE, 'documentos.json')
 
 db = TinyDB(DBPATH)
 disenos = db.table('disenos')

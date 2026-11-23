@@ -17,6 +17,7 @@ Autores: César Aedo y Benjamín Jaque.
 | `datos/ejecutar_datos.py` | Reconstruye la base, ejecuta el DDL y captura `salida_ddl.txt` |
 | `datos/crear_documentos.py` | Base documental TinyDB (`documentos.json`) y `salida_documentos.txt` |
 | `prototipo/` | Interfaz web (HTML/CSS/JS) servida por la misma API |
+| `despliegue/` | Runbook, servicio systemd, Nginx y scripts de despliegue/verificación |
 | `evidencias/` | Capturas, diagramas y salidas de ejecución |
 
 ## Puesta en marcha (protocolo §8.2 A)
@@ -68,5 +69,18 @@ repositorio** (Informe 3, §8.2).
 ## Despliegue
 
 El protocolo completo (nube, IP elástica, Nginx, certificado y controles
-CP-DES-01..03) está en la sección 8.2 del Informe N.º 3; los scripts y las
-evidencias de ejecución se entregan en `evidencias/despliegue/`.
+CP-DES-01..03) está documentado en `despliegue/RUNBOOK.md`, con:
+
+- `despliegue/scripts/preparar_servidor.sh` — aprovisionamiento de la instancia.
+- `despliegue/scripts/desplegar.sh` — despliegue repetible (nunca sobreescribe
+  la base del servidor; las pruebas corren sobre una copia en `/tmp`).
+- `despliegue/scripts/verificar.sh` — CP-DES-01, CP-DES-03 y Tabla 9 desde la
+  dirección pública.
+- `despliegue/scripts/persistencia.sh` — CP-DES-02 en dos fases (antes/después
+  del reinicio real de la instancia).
+- `despliegue/scripts/respaldo.sh` — respaldo diario con integridad verificada.
+- `despliegue/systemd/kotoduo.service` y `despliegue/nginx/kotoduo.conf` —
+  configuración de producción endurecida.
+
+Las salidas y capturas de esa ejecución quedan en `evidencias/despliegue/`
+(Anexo J) y los datos reales en la Tabla 8 del informe.

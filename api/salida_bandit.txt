@@ -1,7 +1,7 @@
 ﻿python.exe : [main]	INFO	profile include tests: None
-En línea: 1 Carácter: 1
-+ & "C:\Users\cesar\Downloads\KotoduoWeb\.venv\Scripts\python.exe" -m b ...
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+En línea: 1 Carácter: 558
++ ... - bandit:"; & ".venv\Scripts\python.exe" -m bandit -r api/app.py 2>&1 ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : NotSpecified: ([main]	INFO	profile include tests: None:String) [], RemoteException
     + FullyQualifiedErrorId : NativeCommandError
  
@@ -9,13 +9,13 @@ En línea: 1 Carácter: 1
 [main]	INFO	cli include tests: None
 [main]	INFO	cli exclude tests: None
 [main]	INFO	running on Python 3.12.10
-Run started:2026-11-23 01:29:42.528587+00:00
+Run started:2026-11-23 02:01:53.725383+00:00
 
 Test results:
 	No issues identified.
 
 Code scanned:
-	Total lines of code: 487
+	Total lines of code: 497
 	Total lines skipped (#nosec): 0
 	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
 

@@ -1,4 +1,4 @@
-Ejecución de consultas: 22-11-2026 22:36
+Ejecución de consultas: 22-11-2026 23:10
 
 ===== CQ-01: siguiente actividad abierta de cada trabajo en producción =====
 codigo | siguiente_etapa | area | responsable
@@ -31,7 +31,7 @@ KTO-2026-016 | 1 | pendiente | NULL
 
 ===== CQ-05: bitacora de una entidad concreta (RF-11) =====
 fecha | nombre | accion | entidad | valor_anterior | valor_posterior
-2026-11-23 01:36:07 | Benjamin Jaque | crear | trabajos | NULL | KTO-2026-014
+2026-11-23 02:10:00 | Benjamin Jaque | crear | trabajos | NULL | KTO-2026-014
 (1 filas)
 
 ===== CQ-06: consumo de insumos por trabajo (trazabilidad producción -> insumos) =====

@@ -5,7 +5,9 @@ from argon2 import PasswordHasher
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 BASE = os.path.dirname(os.path.abspath(__file__))
-DB = os.path.join(BASE, 'kotoduo.db')
+# KOTODUO_DB permite apuntar a otra base (p. ej. una copia de prueba en el
+# servidor) sin modificar este script.
+DB = os.environ.get('KOTODUO_DB') or os.path.join(BASE, 'kotoduo.db')
 
 # Cuentas semilla con hash argon2id real (contraseñas temporales de prueba)
 ph = PasswordHasher()

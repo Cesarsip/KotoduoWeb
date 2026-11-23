@@ -1,0 +1,56 @@
+# Kotoduo Producción - servicio de la API (Informe 3, §8.2 B.8)
+#
+# Un solo proceso (workers=1) a petición del informe: las sesiones de usuario
+# viven en memoria (sección 7.1) y no deben repartirse entre varios procesos.
+# Escucha solo en 127.0.0.1:8000; el único camino hacia ella es Nginx.
+#
+# Instalar en: /etc/systemd/system/kotoduo.service
+#   sudo cp kotoduo.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now kotoduo
+
+[Unit]
+Description=Kotoduo Produccion - API FastAPI (Uvicorn) detras de Nginx
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=exec
+User=kotoduo
+Group=kotoduo
+WorkingDirectory=/opt/kotoduo/api
+Environment="PATH=/opt/kotoduo/.venv/bin:/usr/bin:/bin"
+Environment=PYTHONUNBUFFERED=1
+# En producción Swagger queda desactivado (RNF-07 / mínimo privilegio).
+# Cambiar a 1 solo si se necesita documentación pública temporalmente.
+Environment=KOTODUO_DOCS=0
+ExecStart=/opt/kotoduo/.venv/bin/uvicorn app:app --host 127.0.0.1 --port 8000 --workers 1
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=20
+KillSignal=SIGINT
+
+# --- Endurecimiento: el proceso solo puede escribir en /opt/kotoduo/datos ---
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/kotoduo/datos
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+SystemCallArchitectures=native
+UMask=0027
+
+# --- Diagnóstico ---
+SyslogIdentifier=kotoduo
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
