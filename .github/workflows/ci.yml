@@ -1,0 +1,48 @@
+# Integración continua del proyecto Kotoduo Producción
+# Equivale a la parte A del protocolo de la seccion 8.2, ejecutada en cada push.
+name: ci
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  pruebas:
+    name: Pruebas y analisis estatico
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener el codigo
+        uses: actions/checkout@v4
+
+      - name: Instalar Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependencias (Tabla 7 del Informe 3)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Reconstruir la base y correr las 17 pruebas
+        run: |
+          python datos/ejecutar_datos.py
+          python datos/crear_documentos.py
+          python -m pytest api/ -q | tee api/salida_pytest.txt
+
+      - name: Analisis estatico (bandit)
+        run: |
+          python -m bandit -r api/app.py | tee api/salida_bandit.txt
+
+      - name: Publicar evidencias
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencias-ci
+          path: |
+            api/salida_pytest.txt
+            api/salida_bandit.txt
+            api/salida_rendimiento.txt
+          retention-days: 30

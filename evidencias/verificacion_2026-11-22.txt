@@ -1,0 +1,33 @@
+================================================================================
+Anexo K - Verificacion del arranque con peticiones reales
+Informe 3, seccion 8.3 - "La consola y los codigos de estado quedaron
+registrados en verificacion_2026-11-22.txt"
+Fecha de ejecucion: 22-11-2026 23:36:32
+Servidor: http://127.0.0.1:8000  (Uvicorn, un solo proceso, workers=1)
+================================================================================
+
+23:36:32  OK  GET    /openapi.json                          -> 200 (48 ms, esperado 200)
+              respuesta: paths=13
+23:36:32  OK  GET    /docs                                  -> 200 (1 ms, esperado 200)
+              respuesta: Swagger UI
+23:36:32  OK  GET    /health                                -> 200 (4 ms, esperado 200)
+              respuesta: {"estado":"ok"}
+23:36:32  OK  GET    /tablero                               -> 401 (3 ms, esperado 401)
+              respuesta: {"detail":"Not authenticated"}
+23:36:32  OK  GET    /usuarios                              -> 401 (4 ms, esperado 401)
+              respuesta: {"detail":"Not authenticated"}
+23:36:32  OK  POST   /auth/login                            -> 401 (61 ms, esperado 401)
+              respuesta: {"detail":"Credenciales inválidas"}
+23:36:32  OK  POST   /auth/login                            -> 200 (55 ms, esperado 200)
+              respuesta: token emitido (oculto)
+23:36:32  OK  GET    /trabajos                              -> 200 (4 ms, esperado 200)
+              respuesta: 3 trabajos
+23:36:32  OK  GET    /trabajos/KTO-2026-015/estado          -> 200 (4 ms, esperado 200)
+              respuesta: etapa y responsable
+23:36:32  OK  POST   /trabajos                              -> 422 (4 ms, esperado 422)
+              respuesta: {"detail":[{"type":"string_pattern_mismatch","loc":["body","codigo"],"msg":"String should match pattern '^KTO-2026-\\d{3
+23:36:32  OK  POST   /trabajos                              -> 401 (3 ms, esperado 401)
+              respuesta: {"detail":"Not authenticated"}
+
+Resumen: todos los codigos de estado coinciden con lo esperado.
+La autorizacion corta antes de leer un solo dato (401 sin token).
