@@ -39,7 +39,8 @@ from fastapi import FastAPI, HTTPException, Depends, Request, Path, Query as Que
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from pydantic import BaseModel, Field, field_validator, model_validator
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError, InvalidHashError
@@ -1046,4 +1047,28 @@ def sin_panel_administracion():
 # ------------------------------------------------------------------ interfaz web (§8.2)
 # Última línea de la API: todo lo que no sea un endpoint se resuelve con los
 # archivos de prototipo/ desde este mismo proceso Uvicorn.
-app.mount('/', StaticFiles(directory=PROTOTIPO, html=True), name='interfaz')
+class InterfazSPA(StaticFiles):
+    """Sirve la interfaz también en direcciones que no son un archivo.
+
+    Una navegación del navegador (Accept: text/html) que no corresponde a un
+    archivo recibe index.html; desde allí la propia interfaz normaliza la
+    dirección a / cuando hay sesión abierta y a /Login cuando no la hay,
+    de modo que escribir a mano una ruta equivocada nunca deja al usuario
+    en una página de error. Las peticiones que no son navegación (scripts,
+    pruebas, llamadas de la API) siguen recibiendo 404 en JSON, como exige
+    el endurecimiento y registran las pruebas del Anexo K.
+    """
+
+    async def get_response(self, path, scope):
+        try:
+            return await super().get_response(path, scope)
+        except StarletteHTTPException as exc:
+            if exc.status_code != 404:
+                raise
+            cabeceras = dict(scope.get('headers') or [])
+            if b'text/html' in cabeceras.get(b'accept', b'').lower():
+                return FileResponse(os.path.join(PROTOTIPO, 'index.html'))
+            raise
+
+
+app.mount('/', InterfazSPA(directory=PROTOTIPO, html=True), name='interfaz')

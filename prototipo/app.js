@@ -187,6 +187,17 @@
     try { localStorage.setItem(CLAVE, JSON.stringify(S)); } catch (e) { /* modo privado */ }
   }
 
+  /* La dirección del navegador acompaña la sesión: / cuando hay sesión
+     abierta y /Login cuando no la hay. Cualquier otra ruta escrita a
+     mano (p. ej. /HOLA) llega igual a esta interfaz y aquí se corrige
+     con replaceState, sin recargar la página. */
+  function normalizarRuta() {
+    var esperada = S.token ? '/' : '/Login';
+    if (location.pathname !== esperada) {
+      try { history.replaceState(null, '', esperada); } catch (e) { /* sin history */ }
+    }
+  }
+
   function leerSesion() {
     try {
       var crudo = localStorage.getItem(CLAVE);
@@ -201,6 +212,7 @@
     });
     $('nav').hidden = false;
     pintarNav();
+    normalizarRuta();
     mostrar(INICIO[S.rol] || 'p-login');
   }
 
@@ -217,6 +229,7 @@
     try { localStorage.removeItem(CLAVE); } catch (e) { /* nada */ }
     $('nav').hidden = true;
     $('sesion').textContent = '';
+    normalizarRuta();
     mostrar('p-login');
     if (!silencioso) toast('Sesión cerrada');
   }
@@ -763,5 +776,6 @@
 
   /* ------------------------------------------------------ Arranque */
   leerSesion();
+  normalizarRuta();
   if (S.token) iniciarSesion(); else mostrar('p-login');
 })();
