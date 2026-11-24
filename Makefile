@@ -4,6 +4,7 @@ PYTHON ?= python
 .PHONY: test run health verificar clean
 
 test:
+	$(PYTHON) datos/preparar_semilla.py
 	$(PYTHON) datos/ejecutar_datos.py
 	$(PYTHON) datos/crear_documentos.py
 	$(PYTHON) -m pytest api/ -q

@@ -40,15 +40,15 @@
             <input id="i-usuario" value="msanchez" autocomplete="username" spellcheck="false">
           </label>
           <label class="campo">Contraseña
-            <input id="i-clave" type="password" value="Koto.Op.2026!" autocomplete="current-password">
+            <input id="i-clave" type="password" placeholder="contraseña de la cuenta" autocomplete="current-password">
           </label>
           <button class="btn ancho" type="submit">Entrar</button>
         </form>
         <p class="demo">Prototipo: elige un perfil de prueba
-          <button class="link" data-user="msanchez|Koto.Op.2026!">Operario</button> ·
-          <button class="link" data-user="bjaque|Koto.Enca.2026">Encargado</button> ·
-          <button class="link" data-user="jrojas|Koto.Vend.2026">Vendedor</button> ·
-          <button class="link" data-user="aeo|Koto.Admin.2026">Administrador</button>
+          <button class="link" data-user="msanchez">Operario</button> ·
+          <button class="link" data-user="bjaque">Encargado</button> ·
+          <button class="link" data-user="jrojas">Vendedor</button> ·
+          <button class="link" data-user="aeo">Administrador</button>
         </p>
         <p class="nota error" id="login-error" hidden></p>
       </div>
@@ -187,7 +187,7 @@
     <form id="f-usuario" class="form-grid tarjeta" hidden>
       <label class="campo">Usuario <input id="u-usuario" placeholder="lgomez" pattern="[a-z0-9._-]{3,20}" required></label>
       <label class="campo">Nombre <input id="u-nombre" placeholder="Lucía Gómez" required></label>
-      <label class="campo">Contraseña <input id="u-clave" type="password" minlength="8" placeholder="mínimo 8 caracteres" required></label>
+      <label class="campo">Contraseña <input id="u-clave" type="password" minlength="10" placeholder="mínimo 10 caracteres" required></label>
       <label class="campo">Rol
         <select id="u-rol">
           <option value="operario">Operario</option>

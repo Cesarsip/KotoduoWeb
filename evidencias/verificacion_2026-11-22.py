@@ -7,9 +7,13 @@ tokens ni contraseñas.
 """
 import json, time, urllib.request, urllib.error
 from datetime import datetime
+import os, sys
 
 BASE = 'http://127.0.0.1:8000'
 OUT = __file__.replace('.py', '.txt')
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'datos'))
+from semilla_cuentas import cargar_semilla   # noqa: E402
+
 lineas = []
 
 def reg(etiqueta, metodo, ruta, esperado, codigo, duracion, cuerpo=''):
@@ -60,9 +64,11 @@ c, b, d = peticion('GET', '/usuarios')
 reg('sin token', 'GET', '/usuarios', 401, c, d, b)
 
 # 3) login fallido y exitoso
-c, b, d = peticion('POST', '/auth/login', body={'usuario': 'bjaque', 'password': 'clave-erronea'})
+_encargado = next((u, d['clave']) for u, d in cargar_semilla().items()
+                  if d['rol'] == 'encargado')
+c, b, d = peticion('POST', '/auth/login', body={'usuario': _encargado[0], 'password': 'clave-erronea'})
 reg('login malo', 'POST', '/auth/login', 401, c, d, b)
-c, b, d = peticion('POST', '/auth/login', body={'usuario': 'bjaque', 'password': 'Koto.Enca.2026'})
+c, b, d = peticion('POST', '/auth/login', body={'usuario': _encargado[0], 'password': _encargado[1]})
 reg('login ok', 'POST', '/auth/login', 200, c, d, 'token emitido (oculto)')
 token = json.loads(b)['token']
 

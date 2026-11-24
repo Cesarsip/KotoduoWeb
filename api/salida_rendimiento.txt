@@ -1,1 +1,1 @@
-GET /tablero x200: total 1.327s, promedio 6.6 ms/req
+GET /tablero x200: total 1.676s, promedio 8.4 ms/req

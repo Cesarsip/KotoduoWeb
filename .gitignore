@@ -5,6 +5,11 @@ __pycache__/
 .venv/
 venv/
 
+# Configuracion local: NUNCA viaja con el codigo (hay plantilla en .env.example)
+.env
+.env.*
+!.env.example
+
 # Credenciales de semilla: NUNCA viajan con el código (Informe 3, §8.2)
 api/credenciales_semilla.txt
 

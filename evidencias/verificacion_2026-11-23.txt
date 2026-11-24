@@ -1,0 +1,74 @@
+================================================================================================
+Anexo K - Verificacion del arranque y del endurecimiento de seguridad
+Informe 3, seccion 8.3 - "La consola y los codigos de estado quedaron
+registrados en verificacion_2026-11-23.txt"
+Fecha de ejecucion: 23-11-2026 19:47:44
+Servidor: http://127.0.0.1:8000  (Uvicorn, un solo proceso, workers=1)
+Cuentas: archivo de semilla fuera del repositorio (no se imprimen)
+================================================================================================
+
+19:47:44  OK  GET    /openapi.json                                -> 200 (30 ms, esperado 200)
+              respuesta: paths=17
+19:47:44  OK  GET    /docs                                        -> 200 (1 ms, esperado 200)
+              respuesta: Swagger UI
+19:47:44  OK  GET    /health                                      -> 200 (5 ms, esperado 200)
+              respuesta: {"estado":"ok"}
+19:47:44  OK  GET    /admin/                                      -> 404 (2 ms, esperado 404)
+              respuesta: {"detail":"Ruta no encontrada: esta aplicación no tiene panel de administración"}
+19:47:44  OK  GET    /ruta/que/no/existe                          -> 404 (3 ms, esperado 404)
+              respuesta: {"detail":"Not Found"}
+19:47:44  OK  GET    /tablero                                     -> 401 (2 ms, esperado 401)
+              respuesta: {"detail":"Falta la sesión: inicia de nuevo para continuar"}
+19:47:44  OK  GET    /tablero                                     -> 401 (3 ms, esperado 401)
+              respuesta: {"detail":"Sesión inválida o expirada"}
+19:47:44  OK  POST   /auth/login                                  -> 401 (52 ms, esperado 401)
+              respuesta: {"detail":"Credenciales inválidas"}
+19:47:44  OK  POST   /auth/login                                  -> 200 (52 ms, esperado 200)
+              respuesta: access + refresh emitidos (ocultos)
+              expira_en=900 s (acceso 15 min, refresco 8 h)
+19:47:44  OK  POST   /auth/refresh                                -> 200 (4 ms, esperado 200)
+              respuesta: token de acceso nuevo emitido
+19:47:44  OK  GET    /tablero                                     -> 200 (6 ms, esperado 200)
+              respuesta: la sesion sigue viva tras renovar
+19:47:44  OK  GET    /trabajos                                    -> 200 (5 ms, esperado 200)
+              respuesta: 3 trabajos
+19:47:44  OK  GET    /trabajos/KTO-2026-015/estado                -> 200 (7 ms, esperado 200)
+              respuesta: etapa y responsable
+19:47:44  OK  GET    /trabajos/ABC/estado                         -> 422 (3 ms, esperado 422)
+              respuesta: validacion estricta de ruta
+19:47:44  OK  POST   /trabajos                                    -> 422 (3 ms, esperado 422)
+              respuesta: {"detail":[{"msg":"codigo: no cumple el formato esperado","campo":"codigo"}]}
+19:47:44  OK  POST   /trabajos                                    -> 401 (4 ms, esperado 401)
+              respuesta: {"detail":"Falta la sesión: inicia de nuevo para continuar"}
+19:47:44  OK  cabecera x-content-type-options: nosniff
+19:47:44  OK  cabecera x-frame-options: DENY
+19:47:44  OK  cabecera content-security-policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline
+
+----- Bloqueo por intentos fallidos (423 Locked) -----
+19:47:44  OK  POST   /usuarios                                    -> 201 (55 ms, esperado 201)
+              respuesta: {"id":6,"usuario":"bloqueo.194744","nombre":"Cuenta de bloqueo","rol":"operario","activo":1}
+19:47:44  OK  POST   /auth/login                                  -> 401 (57 ms, esperado 401)
+              respuesta: {"detail":"Credenciales inválidas"}
+19:47:44  OK  POST   /auth/login                                  -> 401 (55 ms, esperado 401)
+              respuesta: {"detail":"Credenciales inválidas"}
+19:47:44  OK  POST   /auth/login                                  -> 423 (54 ms, esperado 423)
+              respuesta: {"detail":"Cuenta bloqueada 15 minutos tras 3 intentos fallidos de bloqueo.194744. Si no fuiste tú, avisa al administrador"}
+19:47:44  OK  POST   /auth/login                                  -> 423 (3 ms, esperado 423)
+              respuesta: {"detail":"Cuenta bloqueada tras 3 intentos fallidos de bloqueo.194744; vuelve a intentarlo en 15 minuto(s). Si no fuiste tú, avisa al administrador"}
+19:47:44  OK  bitacora: 1 entrada(s) login_bloqueado con usuario e IP
+              registro: 3 fallos consecutivos desde 127.0.0.1 | bloqueado 15 minutos
+19:47:44  OK  POST   /usuarios                                    -> 201 (61 ms, esperado 201)
+              respuesta: {"id":7,"usuario":"baja.194744","nombre":"Cuenta de baja","rol":"vendedor","activo":1}
+19:47:44  OK  PATCH  /usuarios/7                                  -> 200 (10 ms, esperado 200)
+              respuesta: {"id":7,"usuario":"baja.194744","nombre":"Cuenta de baja","rol":"vendedor","activo":0}
+19:47:44  OK  POST   /auth/login                                  -> 401 (4 ms, esperado 401)
+              respuesta: {"detail":"Credenciales inválidas"}
+19:47:44  OK  POST   /auth/logout                                 -> 200 (2 ms, esperado 200)
+              respuesta: {"mensaje":"Sesión cerrada"}
+19:47:44  OK  GET    /tablero                                     -> 401 (3 ms, esperado 401)
+              respuesta: {"detail":"Sesión inválida o expirada"}
+
+Resumen: todos los codigos de estado coinciden con lo esperado.
+La autorizacion corta antes de leer un solo dato (401 sin token),
+la cuenta se bloquea a los tres fallos (423) con su entrada en la
+bitacora, y no existe panel de administracion (404 en JSON).

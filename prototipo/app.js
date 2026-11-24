@@ -1,6 +1,8 @@
 /* ============================================================
    Kotoduo Producción - interfaz contra la API real (Unidad 3)
-   · Sesión con token Bearer guardado en el navegador.
+   · Sesión con token Bearer guardado en el navegador; el token de
+     acceso vence a los 15 minutos y se renueva solo con el de
+     refresco (8 horas) cuando la API responde 401.
    · Cada pantalla pide a la API sus datos; no hay datos simulados.
    · El menú y las acciones se habilitan según el rol (RBAC en el
      servidor manda: aquí solo se evita mostrar lo que no se puede usar).
@@ -33,7 +35,7 @@
     'sin_version': ['gris', 'Sin versión']
   };
 
-  var S = { token: null, usuario: null, nombre: null, rol: null };
+  var S = { token: null, refresh: null, usuario: null, nombre: null, rol: null };
   var disenosCargados = false;
   var avisoTimer = null;
 
@@ -98,9 +100,31 @@
       404: 'No se encontró lo pedido',
       409: 'Conflicto: revisa el estado actual',
       422: 'Revisa los campos ingresados',
+      423: 'Cuenta bloqueada por intentos fallidos: espera unos minutos',
+      429: 'Demasiadas peticiones o intentos: espera un minuto',
       500: 'Error interno del servidor'
     };
     return mapa[status] || ('Error ' + status);
+  }
+
+  /* Renueva el token de acceso con el de refresco (8 h) cuando el de
+     acceso (15 min) ya venció. Nunca usa api() para no encadenar. */
+  async function renovarSesion() {
+    if (!S.refresh) return false;
+    try {
+      var r = await fetch('/auth/refresh', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: S.refresh })
+      });
+      if (!r.ok) return false;
+      var d = await r.json();
+      S.token = d.token;
+      guardarSesion();
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   async function api(ruta, opciones) {
@@ -116,6 +140,14 @@
     var r = await fetch(ruta, opts);
     var datos = null;
     try { datos = await r.json(); } catch (e) { /* sin cuerpo JSON */ }
+    // 401 con refresco vigente: se renueva el acceso y se reintenta una vez.
+    if (r.status === 401 && ruta !== '/auth/login' && !opts.renovado && S.refresh) {
+      if (await renovarSesion()) {
+        opts.renovado = true;
+        delete opts.headers;
+        return api(ruta, opts);
+      }
+    }
     if (r.status === 401) {
       cerrarSesion(true);
       throw new Error('Sesión expirada: vuelve a iniciar sesión');
@@ -173,7 +205,15 @@
   }
 
   function cerrarSesion(silencioso) {
-    S = { token: null, usuario: null, nombre: null, rol: null };
+    // Cierre en el servidor (retira acceso y refresco); en el silencioso el
+    // token ya fue rechazado, así que no se molesta en pedirlo.
+    if (!silencioso && S.token) {
+      fetch('/auth/logout', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + S.token }
+      }).catch(function () { /* sin red o sesión ya vencida */ });
+    }
+    S = { token: null, refresh: null, usuario: null, nombre: null, rol: null };
     try { localStorage.removeItem(CLAVE); } catch (e) { /* nada */ }
     $('nav').hidden = true;
     $('sesion').textContent = '';
@@ -201,7 +241,8 @@
       method: 'POST',
       body: { usuario: usuario, password: password }
     });
-    S = { token: d.token, usuario: d.usuario, nombre: d.nombre, rol: d.rol };
+    S = { token: d.token, refresh: d.refresh_token,
+          usuario: d.usuario, nombre: d.nombre, rol: d.rol };
     guardarSesion();
     $('login-error').hidden = true;
     iniciarSesion();
@@ -222,10 +263,11 @@
 
   document.querySelectorAll('.link[data-user]').forEach(function (b) {
     b.addEventListener('click', function () {
-      var partes = b.getAttribute('data-user').split('|');
-      $('i-usuario').value = partes[0];
-      $('i-clave').value = partes[1];
-      $('f-login').dispatchEvent(new Event('submit', { cancelable: true }));
+      // Rellena solo el usuario: la contraseña nunca vive en el código
+      // (está en el archivo de semilla, fuera del repositorio).
+      $('i-usuario').value = b.getAttribute('data-user');
+      $('i-clave').value = '';
+      $('i-clave').focus();
     });
   });
 

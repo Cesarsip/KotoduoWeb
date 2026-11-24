@@ -3,17 +3,24 @@
 import sys, os, time, random
 from fastapi.testclient import TestClient
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+BASE_API = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, BASE_API)
+sys.path.insert(0, os.path.join(BASE_API, '..', 'datos'))
 from app import app, ROLES_PERMITIDOS  # noqa: E402
+from semilla_cuentas import cargar_semilla  # noqa: E402
 
 c = TestClient(app)
 
-USUARIOS = {
-    'admin':     ('aeo', 'Koto.Admin.2026'),
-    'encargado': ('bjaque', 'Koto.Enca.2026'),
-    'operario':  ('msanchez', 'Koto.Op.2026!'),
-    'vendedor':  ('jrojas', 'Koto.Vend.2026'),
-}
+# Cuentas desde el archivo de semilla (fuera del repositorio): las mismas
+# con las que se reconstruye la base en conftest.py.
+_ALIAS_ROL = {'administrador': 'admin', 'encargado': 'encargado',
+              'operario': 'operario', 'vendedor': 'vendedor'}
+USUARIOS: dict = {}
+for _usuario, _datos in cargar_semilla().items():
+    if _datos['rol'] in _ALIAS_ROL:
+        USUARIOS.setdefault(_ALIAS_ROL[_datos['rol']], (_usuario, _datos['clave']))
+assert set(USUARIOS) == {'admin', 'encargado', 'operario', 'vendedor'}, \
+    'la semilla no contiene las cuatro cuentas de prueba'
 
 
 def token(rol: str) -> dict:

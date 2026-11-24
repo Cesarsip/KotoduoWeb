@@ -9,14 +9,13 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 # servidor) sin modificar este script.
 DB = os.environ.get('KOTODUO_DB') or os.path.join(BASE, 'kotoduo.db')
 
-# Cuentas semilla con hash argon2id real (contraseñas temporales de prueba)
+# Cuentas semilla con hash argon2id real. Las contraseñas no están en el
+# código: se leen de api/credenciales_semilla.txt (fuera del repositorio).
+from semilla_cuentas import cargar_semilla   # noqa: E402
+
 ph = PasswordHasher()
-CLAVES = {
-    'aeo': 'Koto.Admin.2026',
-    'bjaque': 'Koto.Enca.2026',
-    'msanchez': 'Koto.Op.2026!',
-    'jrojas': 'Koto.Vend.2026',
-}
+CLAVES = {usuario: datos['clave']
+          for usuario, datos in cargar_semilla().items()}
 
 if os.path.exists(DB):
     os.remove(DB)
@@ -35,6 +34,8 @@ for fname, label in (('kotoduo_schema.sql', 'DDL (esquema)'),
     if fname == 'kotoduo_datos.sql':
         for usuario, clave in CLAVES.items():
             marcador = f"'{usuario}'"
+            if marcador not in sql:
+                continue   # cuenta de la semilla sin fila en los datos
             pos = sql.index(marcador)
             fin = sql.index("'$argon2id$v=19$m=65536,t=3,p=4$placeholder$hash'", pos)
             sql = (sql[:fin] + f"'{ph.hash(clave)}'" + sql[fin + len("'$argon2id$v=19$m=65536,t=3,p=4$placeholder$hash'"):])

@@ -26,6 +26,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Generar credenciales de semilla (no viajan en el repo)
+        run: python datos/preparar_semilla.py
+
       - name: Reconstruir la base y correr las 17 pruebas
         run: |
           python datos/ejecutar_datos.py

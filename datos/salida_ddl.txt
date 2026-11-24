@@ -1,4 +1,4 @@
-Ejecución: 22-11-2026 23:11
+Ejecución: 23-11-2026 22:55
 SQLite 3.49.1
 
 ===== DDL (esquema): kotoduo_schema.sql =====

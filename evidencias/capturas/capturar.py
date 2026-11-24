@@ -10,10 +10,18 @@ mismas capturas desde la dirección pública una vez publicada la aplicación,
 tal como prevé el Informe 3, §5.3.
 """
 import os
+import sys
 from playwright.sync_api import sync_playwright
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 URL = os.environ.get('KOTODUO_URL', 'http://127.0.0.1:8000/')
+
+# Cuentas desde el archivo de semilla (fuera del repositorio): nunca están
+# en este script ni en la interfaz.
+sys.path.insert(0, os.path.join(BASE, '..', '..', 'datos'))
+from semilla_cuentas import cargar_semilla   # noqa: E402
+
+CUENTAS = {d['rol']: (u, d['clave']) for u, d in cargar_semilla().items()}
 
 
 def nom(br, nombre):
@@ -24,8 +32,13 @@ def nom(br, nombre):
     print('capturado', nombre, '->', URL)
 
 
-def entrar(br, perfil, pantalla):
-    br.click('button.link[data-user="%s"]' % perfil)
+def entrar(br, rol, pantalla):
+    """Inicio de sesión como en la interfaz real: el botón del perfil rellena
+    el usuario y la contraseña se teclea (no vive en el código)."""
+    usuario, clave = CUENTAS[rol]
+    br.click('button.link[data-user="%s"]' % usuario)
+    br.fill('#i-clave', clave)
+    br.click('#f-login button[type="submit"]')
     br.wait_for_selector(pantalla + '.activa')
 
 
@@ -44,7 +57,7 @@ with sync_playwright() as p:
     nom(br, 'cap01_login')
 
     # HU-07 / HU-01: operario con su cola de trabajo real
-    entrar(br, 'msanchez|Koto.Op.2026!', '#p-operario')
+    entrar(br, 'operario', '#p-operario')
     br.wait_for_selector('#btn-avance')
     nom(br, 'cap02_operario_tareas')
 
@@ -56,7 +69,7 @@ with sync_playwright() as p:
 
     # HU-05: tablero con datos reales de la API
     salir(br)
-    entrar(br, 'bjaque|Koto.Enca.2026', '#p-encargado')
+    entrar(br, 'encargado', '#p-encargado')
     br.wait_for_selector('.tarjeta.mini')
     nom(br, 'cap04_encargado_tablero')
 
@@ -68,7 +81,7 @@ with sync_playwright() as p:
 
     # HU-08: ficha de estado del pedido para el vendedor
     salir(br)
-    entrar(br, 'jrojas|Koto.Vend.2026', '#p-vendedor')
+    entrar(br, 'vendedor', '#p-vendedor')
     br.fill('#b-codigo', 'KTO-2026-015')
     br.click('#f-buscar button[type="submit"]')
     br.wait_for_selector('#resultado .tarjeta')
@@ -76,7 +89,7 @@ with sync_playwright() as p:
 
     # HU-07: usuarios y bitácora del administrador
     salir(br)
-    entrar(br, 'aeo|Koto.Admin.2026', '#p-admin')
+    entrar(br, 'administrador', '#p-admin')
     br.wait_for_selector('#tabla-usuarios tr')
     br.wait_for_selector('#tabla-bitacora tr')
     nom(br, 'cap07_admin_usuarios_bitacora')
@@ -85,11 +98,11 @@ with sync_playwright() as p:
     movil = navegador.new_page(viewport={'width': 375, 'height': 720})
     movil.goto(URL, wait_until='load')
     movil.wait_for_selector('#f-login')
-    entrar(movil, 'msanchez|Koto.Op.2026!', '#p-operario')
+    entrar(movil, 'operario', '#p-operario')
     movil.wait_for_selector('#btn-avance')
     nom(movil, 'cap08_movil_operario')
     salir(movil)
-    entrar(movil, 'bjaque|Koto.Enca.2026', '#p-encargado')
+    entrar(movil, 'encargado', '#p-encargado')
     movil.wait_for_selector('.tarjeta.mini')
     nom(movil, 'cap09_movil_tablero')
 
