@@ -27,8 +27,17 @@ CUENTAS = {d['rol']: (u, d['clave']) for u, d in cargar_semilla().items()}
 def nom(br, nombre):
     # dejar terminar la animación de aparición para no capturar texto lavado
     br.wait_for_timeout(450)
+    # Captura con el viewport redimensionado a la altura de la página en lugar
+    # de full_page: con captureBeyondViewport, Chromium pinta la barra inferior
+    # (position: fixed) dos veces y deja una banda fantasma a mitad de la imagen.
+    tam = br.viewport_size
+    alto = br.evaluate('() => document.documentElement.scrollHeight')
+    br.set_viewport_size({'width': tam['width'], 'height': alto})
+    br.wait_for_timeout(150)
     ruta = os.path.join(BASE, nombre + '.png')
-    br.screenshot(path=ruta, full_page=True)
+    br.screenshot(path=ruta)
+    br.set_viewport_size(tam)
+    br.wait_for_timeout(80)
     print('capturado', nombre, '->', URL)
 
 
@@ -76,7 +85,12 @@ with sync_playwright() as p:
     # HU-03: formulario de nuevo trabajo con código sugerido
     br.click('#btn-nuevo')
     br.wait_for_selector('#p-nuevo.activa')
-    br.wait_for_function("document.getElementById('t-codigo').value !== ''")
+    # esperar el código sugerido sin wait_for_function: la CSP de la API
+    # (script-src 'self') bloquea el eval que Playwright usa en esa función
+    for _ in range(40):
+        if br.input_value('#t-codigo').strip():
+            break
+        br.wait_for_timeout(150)
     nom(br, 'cap05_encargado_nuevo_trabajo')
 
     # HU-08: ficha de estado del pedido para el vendedor
