@@ -40,7 +40,13 @@
             <input id="i-usuario" value="msanchez" autocomplete="username" spellcheck="false">
           </label>
           <label class="campo">Contraseña
-            <input id="i-clave" type="password" placeholder="contraseña de la cuenta" autocomplete="current-password">
+            <span class="con-ojo">
+              <input id="i-clave" type="password" placeholder="contraseña de la cuenta" autocomplete="current-password">
+              <button class="ojo" type="button" data-campo="i-clave" aria-pressed="false" aria-label="Mostrar contraseña">
+                <svg class="ojo-abierto" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 19 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="ojo-cerrado" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg>
+              </button>
+            </span>
           </label>
           <button class="btn ancho" type="submit">Entrar</button>
         </form>
@@ -170,6 +176,13 @@
       <button class="btn" type="submit">Buscar</button>
     </form>
 
+    <p class="demo">Pedidos de ejemplo de la semilla:
+      <button class="link chip" data-codigo="KTO-2026-015">015 en producción</button> ·
+      <button class="link chip" data-codigo="KTO-2026-016">016 detenido</button> ·
+      <button class="link chip" data-codigo="KTO-2026-017">017 en diseño</button> ·
+      <button class="link chip" data-codigo="KTO-2026-022">022 terminado</button>
+    </p>
+
     <div class="carga" id="ven-carga" hidden><span class="spinner" aria-label="Cargando"></span></div>
     <div class="grilla-1" id="resultado"></div>
   </section>
@@ -187,7 +200,15 @@
     <form id="f-usuario" class="form-grid tarjeta" hidden>
       <label class="campo">Usuario <input id="u-usuario" placeholder="lgomez" pattern="[a-z0-9._-]{3,20}" required></label>
       <label class="campo">Nombre <input id="u-nombre" placeholder="Lucía Gómez" required></label>
-      <label class="campo">Contraseña <input id="u-clave" type="password" minlength="10" placeholder="mínimo 10 caracteres" required></label>
+      <label class="campo">Contraseña
+        <span class="con-ojo">
+          <input id="u-clave" type="password" minlength="10" placeholder="mínimo 10 caracteres" required>
+          <button class="ojo" type="button" data-campo="u-clave" aria-pressed="false" aria-label="Mostrar contraseña">
+            <svg class="ojo-abierto" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 19 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="ojo-cerrado" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg>
+          </button>
+        </span>
+      </label>
       <label class="campo">Rol
         <select id="u-rol">
           <option value="operario">Operario</option>

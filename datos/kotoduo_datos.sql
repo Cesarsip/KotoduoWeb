@@ -78,15 +78,21 @@ INSERT INTO etapas_trabajo (trabajo_id, etapa_def_id, estado, responsable_id, fe
 INSERT INTO insumos (nombre, unidad, stock_actual, umbral_minimo) VALUES
   ('Tinta sublimación negra','litros', 0.8, 2.0),
   ('Polos blancos M','unidades', 120, 40),
-  ('Hilo poliester blanco','rollos', 6, 3);
+  ('Hilo poliester blanco','rollos', 6, 3),
+  ('Vinil adhesivo blanco','metros', 4, 15),
+  ('Bobina de transfer tamaño carta','unidades', 2, 8);
 
 INSERT INTO movimientos_insumo (insumo_id, tipo, cantidad, trabajo_id, usuario_id) VALUES
   (1,'consumo',0.6, 2, 3),
   (2,'consumo',40, 1, 3),
-  (3,'ingreso', 4, NULL, 2);
+  (3,'ingreso', 4, NULL, 2),
+  (4,'consumo', 11, 2, 3),
+  (5,'consumo', 6, 5, 3);
 
 INSERT INTO alertas_insumo (insumo_id, stock_momento, umbral_momento, avisado_a, estado, fecha) VALUES
-  (1, 0.8, 2.0, 'encargado,vendedor', 'activa', '2026-10-24 09:10');
+  (1, 0.8, 2.0, 'encargado,vendedor', 'activa', '2026-10-24 09:10'),
+  (4, 4, 15, 'encargado', 'activa', '2026-11-20 08:45'),
+  (5, 2, 8, 'encargado,vendedor', 'activa', '2026-11-23 16:20');
 
 INSERT INTO aprobaciones_diseno (trabajo_id, version, estado, decidido_por, comentarios) VALUES
   (1, 1, 'aprobado',    4, 'Aprobado por el colegio; ajustar color de ribete.'),

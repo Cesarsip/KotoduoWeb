@@ -29,7 +29,8 @@ Uvicorn (systemd, 1 proceso, usuario kotoduo)
 - Proceso único con `workers=1`: las sesiones viven en memoria (§7.1).
 - Nginx tiene `root /opt/kotoduo/prototipo`, así que **las bases de datos no
   son servibles** aunque la aplicación falle.
-- `/health` responde 200 sin sesión para el monitoreo; no expone datos.
+- La comprobación de vida es `GET /`: responde 200 con la pantalla de
+  inicio, sin sesión y sin exponer datos.
 
 ## 2. Requisitos
 
@@ -74,7 +75,7 @@ Qué hace, en orden:
    el despliegue se aborta antes de reiniciar. Evidencia:
    `evidencias/despliegue/salida_pytest_servidor.txt`.
 5. Reinicia el servicio systemd y recarga Nginx.
-6. Consulta `/health`.
+6. Comprueba que `GET /` responde 200 (pantalla de inicio).
 
 **Tabla 8:** *Salida de las pruebas en el servidor* (Anexo J),
 *Comandos principales ejecutados*.
@@ -164,11 +165,11 @@ journalctl -u kotoduo --since today
 tail -f /var/log/nginx/kotoduo.access.log
 grep -E ' (5[0-9]{2}|429) ' /var/log/nginx/kotoduo.access.log | tail -50
 
-# sonda de salud
-curl -s http://127.0.0.1:8000/health
+# comprobación de vida: la pantalla de inicio debe responder 200
+curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8000/
 ```
 
-Alertas a atender: `/health` sin 200, ráfagas de 429 en `/auth/login`
+Alertas a atender: `GET /` sin 200, ráfagas de 429 en `/auth/login`
 (intento de fuerza bruta), errores 5xx, y respaldos con `RESPALDO CORRUPTO`.
 
 ## 9. Rollback

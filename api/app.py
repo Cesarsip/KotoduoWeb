@@ -19,7 +19,7 @@ Endurecimiento de seguridad (sección 10 del Informe 3):
   * Sesión con expiración: token de acceso de 15 minutos y token de
     refresco de 8 horas, ambos aleatorios y vivos solo en memoria.
   * Bloqueo de la cuenta a los tres fallos de inicio de sesión con
-    HTTP 423 Locked durante 15 minutos, entrada en la bitácora con el
+    HTTP 423 Locked durante 5 minutos, entrada en la bitácora con el
     usuario y la IP, y contador a cero al acertar.
   * Límite estricto de intentos de login por IP y límite general de
     peticiones (429), cabeceras de seguridad y CORS configurable por .env.
@@ -73,7 +73,7 @@ def _entero(clave: str, por_defecto: int) -> int:
 TOKEN_MINUTOS = _entero('KOTODUO_TOKEN_MINUTOS', 15)      # token de acceso
 REFRESH_HORAS = _entero('KOTODUO_REFRESH_HORAS', 8)       # token de refresco
 FALLOS_MAX = _entero('KOTODUO_FALLOS_MAX', 3)             # fallos hasta bloquear
-BLOQUEO_MINUTOS = _entero('KOTODUO_BLOQUEO_MINUTOS', 15)   # duración del bloqueo
+BLOQUEO_MINUTOS = _entero('KOTODUO_BLOQUEO_MINUTOS', 5)    # duración del bloqueo
 LOGIN_INTENTOS = _entero('KOTODUO_LOGIN_INTENTOS', 10)     # intentos de login por IP/min
 LIMITE_GENERAL = _entero('KOTODUO_LIMITE_GENERAL', 1200)   # peticiones por IP/min
 CONFIA_PROXY = os.environ.get('KOTODUO_CONFIA_PROXY', '0') == '1'
@@ -920,15 +920,6 @@ def modificar_usuario(body: UsuarioPatch,
     return dict(actualizado)
 
 
-# ------------------------------------------------------------------ operación
-@app.get('/health')
-def health(db=Depends(get_db)):
-    """Sonda de estado para Nginx y el monitoreo: comprueba que la base
-    responde y no expone ningún dato."""
-    db.execute('SELECT 1').fetchone()
-    return {'estado': 'ok'}
-
-
 # ------------------------------------------------------------------ errores en JSON
 def mensaje_validacion(err: dict) -> str:
     """Pasa los mensajes técnicos de validación al español: la interfaz
@@ -1007,7 +998,7 @@ async def cabeceras_y_limite(request: Request, call_next):
     de seguridad en toda respuesta y CORS solo para los orígenes declarados
     en KOTODUO_CORS_ORIGENES (nunca '*')."""
     ip = ip_cliente(request)
-    if request.url.path != '/health' and not ventana_ok(VENTANA, ip, LIMITE_GENERAL):
+    if not ventana_ok(VENTANA, ip, LIMITE_GENERAL):
         return JSONResponse({'detail': 'Demasiadas peticiones desde esta IP; '
                                        'espera un minuto y vuelve a intentarlo'},
                             status_code=429)

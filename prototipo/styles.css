@@ -257,6 +257,41 @@ input:focus, select:focus {
   box-shadow: 0 0 0 4px rgba(37, 99, 235, .15);
 }
 
+/* Ojo para mostrar u ocultar la contraseña al escribirla. */
+.con-ojo { position: relative; display: block; }
+.con-ojo input { padding-right: 2.6rem; }
+.ojo {
+  position: absolute;
+  top: 50%;
+  right: .45rem;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radio-chico);
+  background: transparent;
+  color: var(--texto-suave, #64748B);
+  cursor: pointer;
+}
+.ojo:hover { color: var(--azul); background: rgba(37, 99, 235, .08); }
+.ojo:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .35);
+}
+.ojo svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: 1fr;

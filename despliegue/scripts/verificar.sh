@@ -92,14 +92,6 @@ else
   reg FALLA "Tabla 9: /usuarios sin token devolvió $CODIGO_USUARIOS (se esperaba 401)"
 fi
 
-# --- Sonda de salud (monitoreo) --------------------------------------------
-CODIGO_SALUD="$(http "$URL/health")"
-if [ "$CODIGO_SALUD" = "200" ]; then
-  reg PASS "Operación: /health responde 200"
-else
-  reg FALLA "Operación: /health devolvió $CODIGO_SALUD"
-fi
-
 # --- RNF-07: tránsito cifrado ----------------------------------------------
 case "$URL" in
   https://*)

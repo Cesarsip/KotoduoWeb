@@ -1,7 +1,7 @@
 # Kotoduo Produccion - tareas comunes (Informe 3, seccion 8.2)
 PYTHON ?= python
 
-.PHONY: test run health verificar clean
+.PHONY: test run verificar clean
 
 test:
 	$(PYTHON) datos/preparar_semilla.py
@@ -11,9 +11,6 @@ test:
 
 run:
 	cd api && uvicorn app:app --host 127.0.0.1 --port 8000 --reload
-
-health:
-	curl -s http://127.0.0.1:8000/health
 
 verificar:
 	bash despliegue/scripts/verificar.sh http://127.0.0.1:8000

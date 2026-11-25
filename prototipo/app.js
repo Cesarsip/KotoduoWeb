@@ -149,6 +149,14 @@
       }
     }
     if (r.status === 401) {
+      // En el login un 401 son credenciales malas, no una sesión vencida:
+      // se propaga el detalle del servidor para que el formulario pueda
+      // contar los intentos antes del bloqueo (423).
+      if (ruta === '/auth/login') {
+        var e401 = new Error(mensajeError(401, datos));
+        e401.status = 401;
+        throw e401;
+      }
       cerrarSesion(true);
       throw new Error('Sesión expirada: vuelve a iniciar sesión');
     }
@@ -261,14 +269,76 @@
     iniciarSesion();
   }
 
+  /* Contador de intentos y cuenta regresiva del bloqueo: el servidor
+     bloquea la cuenta a los 3 fallos (FALLOS_MAX) durante 5 minutos
+     (BLOQUEO_MINUTOS) y responde 423 con los minutos que faltan. */
+  var FALLOS_MAX_UI = 3;
+  var BLOQUEO_MINUTOS_UI = 5;
+  var intentosLogin = 0;
+  var bloqueoDe = null;      // usuario bloqueado
+  var finBloqueo = 0;        // marca de tiempo (ms) en que se desbloquea
+  var relojBloqueo = null;
+
+  function pintarBloqueo() {
+    var caja = $('login-error');
+    var quedan = Math.max(0, Math.ceil((finBloqueo - Date.now()) / 1000));
+    if (!quedan) {
+      clearInterval(relojBloqueo);
+      relojBloqueo = null;
+      intentosLogin = 0;
+      bloqueoDe = null;
+      caja.hidden = true;
+      toast('Cuenta desbloqueada: ya puedes iniciar sesión', 'ok');
+      return;
+    }
+    var m = Math.floor(quedan / 60);
+    var s = quedan % 60;
+    caja.textContent = 'Cuenta de ' + bloqueoDe + ' bloqueada por ' + FALLOS_MAX_UI +
+      ' intentos fallidos. Se desbloquea en ' + m + ':' + (s < 10 ? '0' : '') + s + '.';
+    caja.hidden = false;
+  }
+
+  function bloquearDesdeMensaje(usuario, msg) {
+    // El 423 del servidor trae los minutos: "… en 4 minuto(s)" o
+    // "Cuenta bloqueada 5 minutos tras …". Si no se pudieron leer, se
+    // usa el mismo valor por defecto que la API.
+    var mm = msg.match(/(\d+)\s*minuto/);
+    var minutos = mm ? parseInt(mm[1], 10) : BLOQUEO_MINUTOS_UI;
+    bloqueoDe = usuario;
+    finBloqueo = Date.now() + minutos * 60000;
+    if (relojBloqueo) clearInterval(relojBloqueo);
+    relojBloqueo = setInterval(pintarBloqueo, 1000);
+    pintarBloqueo();
+  }
+
   $('f-login').addEventListener('submit', async function (e) {
     e.preventDefault();
+    var usuario = $('i-usuario').value.trim();
+    if (bloqueoDe === usuario && finBloqueo > Date.now()) {
+      pintarBloqueo();
+      return;
+    }
     S.token = null;
     try {
-      await entrarCon($('i-usuario').value.trim(), $('i-clave').value);
+      await entrarCon(usuario, $('i-clave').value);
+      intentosLogin = 0;
+      $('login-error').hidden = true;
     } catch (err) {
       var caja = $('login-error');
-      caja.textContent = err.message;
+      if (err.status === 401) {
+        intentosLogin += 1;
+        var quedan = FALLOS_MAX_UI - intentosLogin;
+        caja.textContent = 'Credenciales inválidas (intento ' + intentosLogin +
+          ' de ' + FALLOS_MAX_UI + '). Al ' + FALLOS_MAX_UI + 'º fallo la cuenta ' +
+          'se bloquea ' + BLOQUEO_MINUTOS_UI + ' minutos.';
+        if (quedan <= 0) caja.textContent = 'Credenciales inválidas.';
+      } else if (err.status === 423) {
+        bloquearDesdeMensaje(usuario, err.message);
+        toast(err.message, 'error');
+        return;
+      } else {
+        caja.textContent = err.message;
+      }
       caja.hidden = false;
       toast(err.message, 'error');
     }
@@ -281,6 +351,22 @@
       $('i-usuario').value = b.getAttribute('data-user');
       $('i-clave').value = '';
       $('i-clave').focus();
+    });
+  });
+
+  /* Ojo de la contraseña: alterna password/texto en el campo indicado
+     por data-campo (login y alta de usuario). */
+  document.querySelectorAll('.ojo').forEach(function (ojo) {
+    ojo.addEventListener('click', function () {
+      var campo = $(ojo.getAttribute('data-campo'));
+      if (!campo) return;
+      var visible = campo.type === 'text';
+      campo.type = visible ? 'password' : 'text';
+      ojo.setAttribute('aria-pressed', String(!visible));
+      ojo.setAttribute('aria-label', visible ? 'Mostrar contraseña' : 'Ocultar contraseña');
+      ojo.querySelector('.ojo-abierto').hidden = !visible;
+      ojo.querySelector('.ojo-cerrado').hidden = visible;
+      campo.focus();
     });
   });
 
@@ -569,6 +655,14 @@
   $('f-buscar').addEventListener('submit', function (e) {
     e.preventDefault();
     buscarPedido($('b-codigo').value.trim().toUpperCase());
+  });
+
+  // Chips de ejemplo: rellena el código y consulta sin escribir a mano.
+  document.querySelectorAll('.chip[data-codigo]').forEach(function (c) {
+    c.addEventListener('click', function () {
+      $('b-codigo').value = c.getAttribute('data-codigo');
+      buscarPedido($('b-codigo').value);
+    });
   });
 
   /* ------------------------------------------------------ Administrador (HU-07) */

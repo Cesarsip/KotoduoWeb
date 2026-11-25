@@ -88,9 +88,10 @@ sleep 1
 echo "    servicio: $(systemctl is-active kotoduo) / habilitado: $(systemctl is-enabled kotoduo)"
 REMOTO
 
-paso "6/6 Sonda de salud local"
-SALUD="$(ssh "${SSH_OPTS[@]}" "$DESTINO" 'curl -fsS http://127.0.0.1:8000/health')"
-echo "    $SALUD"
+paso "6/6 Comprobacion de la interfaz local"
+CODIGO="$(ssh "${SSH_OPTS[@]}" "$DESTINO" 'curl -s -o /dev/null -w %{http_code} http://127.0.0.1:8000/')"
+[ "$CODIGO" = "200" ] || { echo "    la aplicacion responde HTTP $CODIGO"; exit 1; }
+echo "    la aplicacion responde en / (HTTP 200)"
 
 echo
 echo "Despliegue terminado."
