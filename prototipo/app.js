@@ -181,7 +181,11 @@
     if (id === 'p-encargado') cargarEncargado();
     if (id === 'p-nuevo') prepararNuevo();
     if (id === 'p-admin') cargarAdmin();
-    if (id === 'p-vendedor' && !$('resultado').children.length) estadoVacioPedido();
+    if (id === 'p-vendedor' && !$('resultado').children.length) {
+      // Ejemplo cargado de la semilla para que la pantalla no quede vacía.
+      $('b-codigo').value = 'KTO-2026-015';
+      buscarPedido('KTO-2026-015');
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
