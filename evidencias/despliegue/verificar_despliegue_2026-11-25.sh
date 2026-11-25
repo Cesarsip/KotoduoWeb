@@ -94,7 +94,9 @@ echo
 sep
 echo "PRUEBAS AUTOMATIZADAS EN EL SERVIDOR"
 sep
-$PY -m pytest api/ -q > evidencias/despliegue/salida_pytest_servidor.txt 2>&1
+echo "  (sobre copias en /tmp: la base de produccion no se toca)"
+KOTODUO_DB=/tmp/kotoduo_pruebas.db KOTODUO_DOC_DB=/tmp/documentos_pruebas.json \
+  $PY -m pytest api/ -q > evidencias/despliegue/salida_pytest_servidor.txt 2>&1
 CODIGO=$?
 tail -3 evidencias/despliegue/salida_pytest_servidor.txt
 echo "  Codigo de salida de pytest ... $CODIGO"
