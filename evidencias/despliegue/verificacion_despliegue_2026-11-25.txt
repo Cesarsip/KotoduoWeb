@@ -1,0 +1,61 @@
+------------------------------------------------------------
+VERIFICACION DEL DESPLIEGUE - KOTODUO PRODUCCION
+------------------------------------------------------------
+Fecha (UTC) ......... 2026-11-25 18:54:09
+Instancia EC2 ....... i-0e25796c5880a892c
+Region .............. us-east-1
+Sistema operativo ... Ubuntu 26.04.1 LTS
+Python (venv) ....... Python 3.14.4
+Uvicorn ............. Running uvicorn 0.54.0 with CPython 3.14.4 on Linux
+Nginx ............... nginx version: nginx/1.28.3 (Ubuntu)
+Servicio kotoduo .... active (enabled)
+URL publica ......... https://kotoduo.duckdns.org
+
+------------------------------------------------------------
+CP-DES-01. Acceso publico a la interfaz y a la API
+------------------------------------------------------------
+  GET / ...................... 200
+  GET /styles.css ............ 200
+  GET /app.js ................ 200
+  GET /openapi.json .......... 200
+  POST /auth/login ........... rol=administrador, token=entregado
+  GET /tablero con sesion .... 200
+  GET /trabajos con sesion ... 200
+  GET /insumos/alertas ....... 200
+
+------------------------------------------------------------
+CP-DES-03. Rechazo de peticiones sin sesion desde internet
+------------------------------------------------------------
+  GET /tablero sin token ..... 401
+  GET /tablero token falso ... 401
+  GET /bitacora sin token .... 401
+  GET /admin ................. 404
+
+------------------------------------------------------------
+CP-DES-02. Estado de la base ANTES del reinicio
+------------------------------------------------------------
+  Trabajos ................... 11
+  Etapas ..................... 42
+  Usuarios ................... 4
+  Registros de bitacora ...... 9
+  Insumos .................... 5
+  KTO-2026-014 ............... {'codigo': 'KTO-2026-014', 'estado_general': 'en_producción', 'unidades': 40}
+  Sanidad de la base:
+    trabajos con unidades <= 0 ......... 0
+    etapas sin trabajo valido .......... 0
+    roles fuera del catalogo ........... 0
+
+------------------------------------------------------------
+PRUEBAS AUTOMATIZADAS EN EL SERVIDOR
+------------------------------------------------------------
+  (sobre copias en /tmp: la base de produccion no se toca)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+17 passed, 1 warning in 4.42s
+  Codigo de salida de pytest ... 0
+
+------------------------------------------------------------
+FIN DE LA VERIFICACION PREVIA AL REINICIO
+Siguiente paso: sudo reboot y, cuando la instancia vuelva,
+bash evidencias/despliegue/verificar_persistencia_2026-11-25.sh
+------------------------------------------------------------

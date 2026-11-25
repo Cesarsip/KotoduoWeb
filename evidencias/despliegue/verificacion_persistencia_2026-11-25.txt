@@ -1,0 +1,28 @@
+------------------------------------------------------------
+CP-DES-02. Estado de la base DESPUES del reinicio
+------------------------------------------------------------
+Fecha (UTC) ......... 2026-11-25 18:55:33
+Encendido desde ..... 2026-11-25 18:55:06 UTC
+Tiempo encendido .... up 0 minutes
+Servicio kotoduo .... active (enabled)
+
+  Trabajos ................... 11
+  Etapas ..................... 42
+  Usuarios ................... 4
+  Registros de bitacora ...... 9
+  Insumos .................... 5
+  KTO-2026-014 ............... {'codigo': 'KTO-2026-014', 'estado_general': 'en_producción', 'unidades': 40}
+  Sanidad de la base:
+    trabajos con unidades <= 0 ......... 0
+    etapas sin trabajo valido .......... 0
+    roles fuera del catalogo ........... 0
+
+------------------------------------------------------------
+ACCESO PUBLICO DESPUES DEL REINICIO
+------------------------------------------------------------
+  GET / ...................... 200
+  GET /tablero sin token ..... 401
+
+------------------------------------------------------------
+FIN DE LA VERIFICACION DE PERSISTENCIA
+------------------------------------------------------------

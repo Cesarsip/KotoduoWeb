@@ -1,0 +1,13 @@
+------------------------------------------------------------
+VERIFICACION DE LAS CUENTAS DE LA SEMILLA - KOTODUO PRODUCCION
+------------------------------------------------------------
+Fecha (UTC) ......... 2026-11-25 19:17:43
+URL publica ......... https://kotoduo.duckdns.org
+
+  OK      aeo        rol=administrador  HTTP 200 token=si refresco=si
+  OK      bjaque     rol=encargado      HTTP 200 token=si refresco=si
+  OK      msanchez   rol=operario       HTTP 200 token=si refresco=si
+  OK      jrojas     rol=vendedor       HTTP 200 token=si refresco=si
+
+Roles cubiertos .... administrador, encargado, operario, vendedor
+Resultado .......... APROBADO

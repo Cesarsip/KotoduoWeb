@@ -17,26 +17,34 @@ repositorio, en la Tabla 8 ni en las evidencias. Las credenciales viven en
 Navegador (usuario)
    │  HTTPS 443
    ▼
-Nginx  ── sirve prototipo/ (HTML, CSS, JS) y redirige lo demás
+Nginx  ── termina HTTPS y envía todo a Uvicorn
    │  HTTP 127.0.0.1:8000
    ▼
-Uvicorn (systemd, 1 proceso, usuario kotoduo)
-   │
+Uvicorn (systemd, 1 proceso, usuario ubuntu)
+   │  sirve la API y los archivos de prototipo/
    ├── datos/kotoduo.db      SQLite      (estado operativo)
    └── datos/documentos.json TinyDB      (fichas de diseño)
 ```
 
 - Proceso único con `workers=1`: las sesiones viven en memoria (§7.1).
-- Nginx tiene `root /opt/kotoduo/prototipo`, así que **las bases de datos no
-  son servibles** aunque la aplicación falle.
+- Uvicorn monta `prototipo/` como interfaz estática; `datos/` queda fuera del
+  montaje, así que **las bases de datos no son servibles** aunque la
+  aplicación falle.
 - La comprobación de vida es `GET /`: responde 200 con la pantalla de
   inicio, sin sesión y sin exponer datos.
+
+**Nota de la instancia publicada (25-11-2026).** El servicio corre como
+`ubuntu`, con `WorkingDirectory=/home/ubuntu/KotoduoWeb/api` y el proyecto en
+`/home/ubuntu/KotoduoWeb`; los respaldos van a `/home/ubuntu/backups`. Los
+scripts de `despliegue/scripts/` conservan `/opt/kotoduo` y el usuario
+`kotoduo` como valores por defecto para una instalación nueva; en esta
+instancia se usaron las rutas reales que indica este runbook.
 
 ## 2. Requisitos
 
 | Requisito | Detalle |
 |-----------|---------|
-| Instancia EC2 | Ubuntu Server 24.04 LTS, t3.micro o t3.small, par de llaves `.pem` |
+| Instancia EC2 | Ubuntu Server 26.04.1 LTS, t3.micro o t3.small, par de llaves `.pem` |
 | Grupo de seguridad | 22 solo desde la IP de desarrollo; 80 y 443 desde cualquier lugar |
 | IP elástica | Asociada a la instancia (dirección fija registrada en Tabla 8) |
 | Dominio | Un registro apuntando a la IP (DuckDNS sirve); para HTTPS con Let's Encrypt |
@@ -53,7 +61,9 @@ ssh -i clave_kotoduo.pem ubuntu@<IP> 'bash preparar_servidor.sh <IP-DE-DESARROLL
 El script instala paquetes, crea el usuario `kotoduo`, configura UFW (22
 restringido a la IP de desarrollo), activa fail2ban y deja sudo sin contraseña
 solo para los cinco comandos de despliegue. Luego se asocia la IP elástica en
-la consola de AWS.
+la consola de AWS. En la instancia publicada se trabajó con el usuario
+`ubuntu` y la ruta `/home/ubuntu/KotoduoWeb`; el script queda como plantilla
+para una instalación nueva con usuario y ruta dedicados.
 
 **Tabla 8:** *Sistema operativo* (`lsb_release -ds`), *Llave de acceso* (solo
 el nombre del archivo `.pem`), *Comandos principales ejecutados*.
@@ -71,9 +81,11 @@ Qué hace, en orden:
    `credenciales_semilla.txt` y llaves: nunca sobreescribe datos del servidor.
 2. Crea/actualiza el entorno virtual con las versiones exactas de la Tabla 7.
 3. Reconstruye la base **solo si no existe**.
-4. Corre `pytest` contra una copia en `/tmp` (`KOTODUO_DB`): si algo falla,
-   el despliegue se aborta antes de reiniciar. Evidencia:
-   `evidencias/despliegue/salida_pytest_servidor.txt`.
+4. Corre `pytest` contra copias en `/tmp` (`KOTODUO_DB` y
+   `KOTODUO_DOC_DB`): si algo falla, el despliegue se aborta antes de
+   reiniciar. Evidencia: `evidencias/despliegue/salida_pytest_servidor.txt`.
+   **Nunca** ejecutar `pytest` sin esas variables en la instancia publicada:
+   `conftest.py` reconstruye la base y borraría los datos de producción.
 5. Reinicia el servicio systemd y recarga Nginx.
 6. Comprueba que `GET /` responde 200 (pantalla de inicio).
 
@@ -107,14 +119,14 @@ con `verificar.sh https://<dominio>` (incluye la comprobación de redirección).
 ./despliegue/scripts/persistencia.sh https://<dominio> --despues
 ```
 
-Salidas: `evidencias/despliegue/salida_verificacion_publica.txt` y
-`evidencias/despliegue/salida_persistencia.txt`.
+Salidas: `evidencias/despliegue/verificacion_despliegue_2026-11-25.txt` y
+`evidencias/despliegue/verificacion_persistencia_2026-11-25.txt`.
 
 | Caso | Qué comprueba | Estado |
 |------|---------------|--------|
-| CP-DES-01 | URL pública muestra el inicio de sesión y el login emite token | por ejecutar |
-| CP-DES-02 | `KTO-2026-014` sigue presente tras reiniciar la instancia | por ejecutar |
-| CP-DES-03 | `/tablero` y `/usuarios` sin token responden 401 desde internet | por ejecutar |
+| CP-DES-01 | URL pública muestra el inicio de sesión y el login emite token | Aprobado 25-11-2026 |
+| CP-DES-02 | `KTO-2026-014` sigue presente tras reiniciar la instancia | Aprobado 25-11-2026 (reinicio real) |
+| CP-DES-03 | `/tablero` y `/usuarios` sin token responden 401 desde internet | Aprobado 25-11-2026 |
 
 Si algo falla, se registra como incidencia en la Tabla 8 **sin borrar el
 primer intento** (§9.3).
@@ -133,25 +145,28 @@ idénticas pero tomadas desde la URL pública (§5.3).
 ## 7. Respaldos (Tabla 8)
 
 ```bash
-# instalar el cron de respaldo diario a las 03:00 (retención 14 días)
-echo '0 3 * * * root /opt/kotoduo/despliegue/scripts/respaldo.sh >> /var/log/kotoduo-respaldo.log 2>&1' | sudo tee /etc/cron.d/kotoduo-respaldo
+# instalar el cron de respaldo diario a las 03:00 UTC (retención 14 días)
+(crontab -l 2>/dev/null | grep -v 'despliegue/scripts/respaldo.sh'; \
+ echo '0 3 * * * /home/ubuntu/KotoduoWeb/despliegue/scripts/respaldo.sh >> /home/ubuntu/backups/respaldo.log 2>&1') | crontab -
 ```
 
-- Destino: `/var/backups/kotoduo/` (`kotoduo-AAAA-MM-DD_HHMM.db` + `documentos-*.json`).
+- Destino: `/home/ubuntu/backups/` (`kotoduo-AAAA-MM-DD_HHMM.db` + `documentos-*.json`).
 - Copia con la API de copia segura de SQLite (`.backup`), sin detener el servicio.
 - Verificación de integridad (`PRAGMA integrity_check`) en cada ejecución.
+- Primera ejecución registrada: `respaldo ok`, integridad `ok`, 25-11-2026.
 
 **Restauración:**
 
 ```bash
 sudo systemctl stop kotoduo
-sudo cp /var/backups/kotoduo/kotoduo-<fecha>.db /opt/kotoduo/datos/kotoduo.db
-sudo chown kotoduo:kotoduo /opt/kotoduo/datos/kotoduo.db
+sudo cp /home/ubuntu/backups/kotoduo-<fecha>.db /home/ubuntu/KotoduoWeb/datos/kotoduo.db
+sudo chown ubuntu:ubuntu /home/ubuntu/KotoduoWeb/datos/kotoduo.db
 sudo systemctl start kotoduo
 ```
 
 **Tabla 8:** *Ubicación de kotoduo.db y documentos.json, y frecuencia de
-respaldo* → `/opt/kotoduo/datos/`, respaldo diario 03:00, retención 14 días.
+respaldo* → `/home/ubuntu/KotoduoWeb/datos/`, respaldo diario 03:00 UTC en
+`/home/ubuntu/backups/`, retención 14 días.
 
 ## 8. Monitoreo y operación diaria
 
@@ -204,12 +219,12 @@ registrar la incidencia en la Tabla 8.
 
 ## 11. Checklist de entrega
 
-- [ ] IP elástica asociada y registrada en Tabla 8
-- [ ] HTTPS activo con redirección (RNF-07)
-- [ ] CP-DES-01 aprobado
-- [ ] CP-DES-02 aprobado (reinicio real)
-- [ ] CP-DES-03 aprobado (401 desde internet)
-- [ ] `salida_pytest_servidor.txt` con 17 pruebas aprobadas
-- [ ] Cron de respaldo instalado y primera ejecución con `respaldo ok`
-- [ ] Nueve capturas regeneradas con `KOTODUO_URL=https://<dominio>/`
-- [ ] Tabla 8 completa, sin secretos
+- [x] IP elástica asociada y registrada en Tabla 8 (184.193.153.190)
+- [x] HTTPS activo con redirección (RNF-07; Let's Encrypt hasta 22-02-2027)
+- [x] CP-DES-01 aprobado (25-11-2026)
+- [x] CP-DES-02 aprobado (reinicio real, 25-11-2026)
+- [x] CP-DES-03 aprobado (401 desde internet, 25-11-2026)
+- [x] `salida_pytest_servidor.txt` con 17 pruebas aprobadas
+- [x] Cron de respaldo instalado y primera ejecución con `respaldo ok` (25-11-2026)
+- [x] Capturas públicas de login y vendedor agregadas al Anexo J
+- [x] Tabla 8 completa, sin secretos
