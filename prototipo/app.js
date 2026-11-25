@@ -241,6 +241,7 @@
     try { localStorage.removeItem(CLAVE); } catch (e) { /* nada */ }
     $('nav').hidden = true;
     $('sesion').textContent = '';
+    $('i-clave').value = '';
     normalizarRuta();
     mostrar('p-login');
     if (!silencioso) toast('Sesión cerrada');
